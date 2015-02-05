@@ -1,0 +1,364 @@
+@import url(http://fonts.googleapis.com/css?family=PT+Sans:400,700);
+#apptibasemenu {
+  //background: #4cb6ea;
+  margin: 0;
+  width: auto;
+  padding: 0;
+  line-height: 1;
+  display: block;
+  position: relative;
+  font-family: 'PT Sans', sans-serif;
+}
+#apptibasemenu ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: block;
+}
+#apptibasemenu ul:after,
+#apptibasemenu:after {
+  content: " ";
+  display: block;
+  font-size: 0;
+  height: 0;
+  clear: both;
+  visibility: hidden;
+}
+#apptibasemenu ul li {
+  margin: 0;
+  padding: 0;
+  display: block;
+  position: relative;
+}
+#apptibasemenu ul li a {
+  text-decoration: none;
+  display: block;
+  margin: 0;
+  -webkit-transition: color .2s ease;
+  -moz-transition: color .2s ease;
+  -ms-transition: color .2s ease;
+  -o-transition: color .2s ease;
+  transition: color .2s ease;
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+}
+#apptibasemenu ul li ul {
+  position: absolute;
+  left: -9999px;
+  top: auto;
+}
+#apptibasemenu ul li ul li {
+  max-height: 0;
+  position: absolute;
+  -webkit-transition: max-height 0.4s ease-out;
+  -moz-transition: max-height 0.4s ease-out;
+  -ms-transition: max-height 0.4s ease-out;
+  -o-transition: max-height 0.4s ease-out;
+  transition: max-height 0.4s ease-out;
+  background: #ffffff;
+}
+#apptibasemenu ul li ul li.has-sub:after {
+  display: block;
+  position: absolute;
+  content: "";
+  height: 10px;
+  width: 10px;
+  border-radius: 5px;
+  background: #000000;
+  z-index: 1;
+  top: 13px;
+  right: 15px;
+}
+#apptibasemenu.align-right ul li ul li.has-sub:after {
+  right: auto;
+  left: 15px;
+}
+#apptibasemenu ul li ul li.has-sub:before {
+  display: block;
+  position: absolute;
+  content: "";
+  height: 0;
+  width: 0;
+  border: 3px solid transparent;
+  border-left-color: #ffffff;
+  z-index: 2;
+  top: 15px;
+  right: 15px;
+}
+#apptibasemenu.align-right ul li ul li.has-sub:before {
+  right: auto;
+  left: 15px;
+  border-left-color: transparent;
+  border-right-color: #ffffff;
+}
+#apptibasemenu ul li ul li a {
+  font-size: 14px;
+  font-weight: 400;
+  text-transform: none;
+  color: #000000;
+  letter-spacing: 0;
+  display: block;
+  width: 170px;
+  padding: 11px 10px 11px 20px;
+}
+#apptibasemenu ul li ul li:hover > a,
+#apptibasemenu ul li ul li.active > a {
+  color: #4cb6ea;
+}
+#apptibasemenu ul li ul li:hover:after,
+#apptibasemenu ul li ul li.active:after {
+  background: #4cb6ea;
+}
+#apptibasemenu ul li ul li:hover > ul {
+  left: 100%;
+  top: 0;
+}
+#apptibasemenu ul li ul li:hover > ul > li {
+  max-height: 72px;
+  position: relative;
+}
+#apptibasemenu > ul > li {
+  float: left;
+}
+#apptibasemenu.align-center > ul > li {
+  float: none;
+  display: inline-block;
+}
+#apptibasemenu.align-center > ul {
+  text-align: center;
+}
+#apptibasemenu.align-center ul ul {
+  text-align: left;
+}
+#apptibasemenu.align-right > ul {
+  float: right;
+}
+#apptibasemenu.align-right > ul > li:hover > ul {
+  left: auto;
+  right: 0;
+}
+#apptibasemenu.align-right ul ul li:hover > ul {
+  right: 100%;
+  left: auto;
+}
+#apptibasemenu.align-right ul ul li a {
+  text-align: right;
+}
+#apptibasemenu > ul > li:after {
+  content: "";
+  display: block;
+  position: absolute;
+  width: 100%;
+  height: 0;
+  top: 0;
+  z-index: 0;
+  background: #ffffff;
+  -webkit-transition: height .2s;
+  -moz-transition: height .2s;
+  -ms-transition: height .2s;
+  -o-transition: height .2s;
+  transition: height .2s;
+}
+#apptibasemenu > ul > li.has-sub > a {
+  padding-right: 40px;
+}
+#apptibasemenu > ul > li.has-sub > a:after {
+  display: block;
+  content: "";
+  background: #ffffff;
+  height: 12px;
+  width: 12px;
+  position: absolute;
+  border-radius: 13px;
+  right: 14px;
+  top: 16px;
+}
+#apptibasemenu > ul > li.has-sub > a:before {
+  display: block;
+  content: "";
+  border: 4px solid transparent;
+  border-top-color: #4cb6ea;
+  z-index: 2;
+  height: 0;
+  width: 0;
+  position: absolute;
+  right: 16px;
+  top: 21px;
+}
+#apptibasemenu > ul > li > a {
+  color: #ffffff;
+  padding: 15px 20px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  font-size: 14px;
+  z-index: 2;
+  position: relative;
+}
+#apptibasemenu > ul > li:hover:after,
+#apptibasemenu > ul > li.active:after {
+  height: 100%;
+}
+#apptibasemenu > ul > li:hover > a,
+#apptibasemenu > ul > li.active > a {
+  color: #000000;
+}
+#apptibasemenu > ul > li:hover > a:after,
+#apptibasemenu > ul > li.active > a:after {
+  background: #000000;
+}
+#apptibasemenu > ul > li:hover > a:before,
+#apptibasemenu > ul > li.active > a:before {
+  border-top-color: #ffffff;
+}
+#apptibasemenu > ul > li:hover > ul {
+  left: 0;
+}
+#apptibasemenu > ul > li:hover > ul > li {
+  max-height: 72px;
+  position: relative;
+}
+#apptibasemenu #menu-button {
+  display: none;
+}
+#apptibasemenu > ul > li > a {
+  display: block;
+}
+#apptibasemenu > ul > li {
+  width: auto;
+}
+#apptibasemenu > ul > li > ul {
+  width: 170px;
+  display: block;
+}
+#apptibasemenu > ul > li > ul > li {
+  width: 170px;
+  display: block;
+}
+@media all and (max-width: 800px), only screen and (-webkit-min-device-pixel-ratio: 2) and (max-width: 1024px), only screen and (min--moz-device-pixel-ratio: 2) and (max-width: 1024px), only screen and (-o-min-device-pixel-ratio: 2/1) and (max-width: 1024px), only screen and (min-device-pixel-ratio: 2) and (max-width: 1024px), only screen and (min-resolution: 192dpi) and (max-width: 1024px), only screen and (min-resolution: 2dppx) and (max-width: 1024px) {
+  #apptibasemenu > ul {
+    max-height: 0;
+    overflow: hidden;
+    -webkit-transition: max-height 0.35s ease-out;
+    -moz-transition: max-height 0.35s ease-out;
+    -ms-transition: max-height 0.35s ease-out;
+    -o-transition: max-height 0.35s ease-out;
+    transition: max-height 0.35s ease-out;
+  }
+  #apptibasemenu > ul > li > ul {
+    width: 100%;
+    display: block;
+  }
+  #apptibasemenu.align-right ul li a {
+    text-align: left;
+  }
+  #apptibasemenu > ul > li > ul > li {
+    width: 100%;
+    display: block;
+  }
+  #apptibasemenu.align-right ul ul li a {
+    text-align: left;
+  }
+  #apptibasemenu > ul > li > ul > li > a {
+    width: 100%;
+    display: block;
+  }
+  #apptibasemenu ul li ul li a {
+    width: 100%;
+  }
+  #apptibasemenu.align-center > ul {
+    text-align: left;
+  }
+  #apptibasemenu.align-center > ul > li {
+    display: block;
+  }
+  #apptibasemenu > ul.open {
+    max-height: 1000px;
+    border-top: 1px solid rgba(110, 110, 110, 0.25);
+  }
+  #apptibasemenu ul {
+    width: 100%;
+  }
+  #apptibasemenu ul > li {
+    float: none;
+    width: 100%;
+  }
+  #apptibasemenu ul li a {
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+    width: 100%;
+    padding: 12px 20px;
+  }
+  #apptibasemenu ul > li:after {
+    display: none;
+  }
+  #apptibasemenu ul li.has-sub > a:after,
+  #apptibasemenu ul li.has-sub > a:before,
+  #apptibasemenu ul li ul li.has-sub:after,
+  #apptibasemenu ul li ul li.has-sub:before {
+    display: none;
+  }
+  #apptibasemenu ul li ul,
+  #apptibasemenu ul li ul li ul,
+  #apptibasemenu ul li ul li:hover > ul,
+  #apptibasemenu.align-right ul li ul,
+  #apptibasemenu.align-right ul li ul li ul,
+  #apptibasemenu.align-right ul li ul li:hover > ul {
+    left: 0;
+    position: relative;
+    right: auto;
+  }
+  #apptibasemenu ul li ul li,
+  #apptibasemenu ul li:hover > ul > li {
+    max-height: 999px;
+    position: relative;
+    background: none;
+  }
+  #apptibasemenu ul li ul li a {
+    padding: 8px 20px 8px 35px;
+    color: #ffffff;
+  }
+  #apptibasemenu ul li ul ul li a {
+    padding: 8px 20px 8px 50px;
+  }
+  #apptibasemenu ul li ul li:hover > a {
+    color: #000000;
+  }
+  #apptibasemenu #menu-button {
+    display: block;
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+    width: 100%;
+    padding: 15px 20px;
+    text-transform: uppercase;
+    font-weight: 700;
+    font-size: 14px;
+    letter-spacing: 1px;
+    color: #ffffff;
+    cursor: pointer;
+  }
+  #apptibasemenu #menu-button:after {
+    display: block;
+    content: '';
+    position: absolute;
+    height: 3px;
+    width: 22px;
+    border-top: 2px solid #ffffff;
+    border-bottom: 2px solid #ffffff;
+    right: 20px;
+    top: 16px;
+  }
+  #apptibasemenu #menu-button:before {
+    display: block;
+    content: '';
+    position: absolute;
+    height: 3px;
+    width: 22px;
+    border-top: 2px solid #ffffff;
+    right: 20px;
+    top: 26px;
+  }
+}

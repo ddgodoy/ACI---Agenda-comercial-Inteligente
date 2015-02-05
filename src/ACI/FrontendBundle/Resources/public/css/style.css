@@ -1,0 +1,98 @@
+/* 
+    Document   : style
+    Created on : 21-mar-2014, 14:16:55
+    Author     : linuxcreator
+    Description:
+        Purpose of the stylesheet follows.
+*/
+
+
+.page_item:hover{
+    cursor: pointer;
+}
+.page_item{
+    padding: 5px 5px;
+    border-bottom: 1px solid #3D3D3D;    
+}
+
+.page_item a{
+    text-shadow: 0 -1px 0 rgba(0,0,0,0.5);
+    text-decoration: none;
+    color: #B2B2B2;
+    cursor: pointer;
+    font-family: "Myriad Pro",Myriad,"Liberation Sans","Nimbus Sans L","Helvetica Neue",Helvetica,Arial,sans-serif;
+    font-size: 14px;
+}
+.page_item a:hover{
+    text-decoration: none;
+}
+.tree_page{
+    list-style-type: none;
+    margin: 0 auto;
+}
+
+.tree_page li{
+   margin: 0 auto !important; 
+}
+
+
+#item_actions{
+    display: none;    
+}
+
+.cuadrante-title{
+    font-family: 'Lato',Calibri,Arial,sans-serif;
+    color: #FFFFFF;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: bold;
+    text-shadow: 0 1px 0 rgba(0, 0, 0, 0.3);
+    text-transform: uppercase;
+    margin-left: 15%;
+}
+
+.cintillo-title{
+    
+}
+
+.btn-right{
+    margin-left: 7%;
+    margin-top: 2%;
+}
+
+
+
+nav{
+    background-color: #222222;
+}
+
+.navbar-brand {
+    float: left;
+    font-size: 18px;
+    margin-top: 5px;
+    line-height: 20px;
+}
+.themetitle{
+    color: #fff;
+    font-family: "Helvetica" !important;
+    font-size: 12px;
+    text-align: center;
+    
+}
+
+.item-themetitle{
+    color: #fff;
+    font-family: "Helvetica" !important;
+    font-size: 12px;
+    text-align: left;
+    cursor: pointer;
+    padding-bottom: 2px;
+    padding-left: 0px !important;
+    padding-right: 0px !important;
+}
+.item-themetitle:hover{
+    opacity: 0.8;
+}
+
+
+

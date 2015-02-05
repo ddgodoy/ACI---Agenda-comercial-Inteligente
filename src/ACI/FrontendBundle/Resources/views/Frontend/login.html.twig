@@ -1,0 +1,32 @@
+{%extends "::frontendBase.html.twig"%}
+
+{% block content %}
+    <div class="content-padded">
+        <form action="{{ path("_security_check") }}" method="post">
+
+
+            <span>
+                {% if not error %}
+                    {{ 'Introduce usuario y contraseña'| trans }}
+                {% else %}
+                    {{ "Opps! Credenciales incorrectas" | trans}}
+                {% endif %}
+            </span>
+            <div class="input-group">
+                <div class="input-row">
+                    <label>Usuario</label>
+                    <input type="text" placeholder="correo@ejemplo.com" name="_username">
+                </div>
+                <div class="input-row">
+                    <label>Contrase&ntilde;a</label>
+                    <input type="password" name="_password" placeholder="ACI_pass">
+                </div>
+            </div><br>
+            <button type="submit" class="btn">
+                Enviar <i class="m-icon-swapright m-icon-white"></i>
+            </button>
+        </form>
+    </div>
+
+
+{% endblock %}

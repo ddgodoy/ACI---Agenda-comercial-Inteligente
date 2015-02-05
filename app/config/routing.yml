@@ -1,0 +1,11 @@
+
+
+safety:
+    resource: "@SafetyBundle/Controller/"
+    type:     annotation
+    prefix:   /admin
+
+cms:
+    resource: "@FrontendBundle/Controller/"
+    type:     annotation
+    prefix:   /

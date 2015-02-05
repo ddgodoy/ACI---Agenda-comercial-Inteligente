@@ -1,0 +1,16 @@
+services: 
+    apptibase.cms:
+      arguments: ['@doctrine']
+      class: ACI\FrontendBundle\Services\CmsService
+    site_manager:
+        class: ACI\FrontendBundle\Domain\SiteManager
+    current_site_listener:
+        class: ACI\FrontendBundle\EventListener\SubdomainListener
+        arguments:
+            - "@site_manager"
+            - "@doctrine"
+        tags:
+            -
+                name: kernel.event_listener
+                method: onKernelRequest
+                event: kernel.request    
