@@ -1,0 +1,19 @@
+parameters:
+    database_driver:   pdo_mysql
+    database_host:     localhost
+    database_port:     ~
+    database_name:     aci
+    database_user:     aci
+    database_password: aci.2015
+
+    mailer_transport:  smtp
+    mailer_host:       127.0.0.1
+    mailer_user:       ~
+    mailer_password:   ~
+
+    locale:            es
+    secret:            ThisTokenIsNotSoSecretChangeIt
+
+
+
+    document.directorio: %kernel.root_dir%/../web/uploads/documents/
