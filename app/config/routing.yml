@@ -6,6 +6,6 @@ safety:
     prefix:   /admin
 
 cms:
-    resource: "@FrontendBundle/Controller/"
+    resource: "@AppBundle/Controller/"
     type:     annotation
     prefix:   /
