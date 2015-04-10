@@ -18,6 +18,7 @@ class AppKernel extends Kernel {
             new Stof\DoctrineExtensionsBundle\StofDoctrineExtensionsBundle(),
             new ACI\SafetyBundle\SafetyBundle(),
             new ACI\AppBundle\AppBundle(),
+            new ACI\BackendBundle\BackendBundle(),
         );
 
         if (in_array($this->getEnvironment(), array('dev', 'test'))) {

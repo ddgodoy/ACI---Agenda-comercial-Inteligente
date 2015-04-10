@@ -36,23 +36,38 @@ security:
 
 
         # Firewall global utilizado en la parte pública o frontend
-        frontend:
-            pattern: ^/
-            provider: usuarios
-            anonymous: ~
+#        frontend:
+#            pattern: ^/
+#            provider: usuarios
+#            anonymous: ~
+#            form_login:
+#                login_path: /login
+#                check_path: /login_check
+#                use_referer: true
+#                default_target_path: /dashboard
+#                always_use_default_target_path: false
+#            logout:
+#                path: /logout
+#                target: /
+#            remember_me:
+#                key:        cms
+#                lifetime:   86400
+
+        backend:
+            pattern:        ^/
+            provider:       usuarios
             form_login:
-                login_path: /login
-                check_path: /login_check
-                use_referer: true
-                default_target_path: /dashboard
-                always_use_default_target_path: false
+                login_path: /admin/login
+                check_path: /admin/login_check
+                default_target_path: /admin/dashboard
+                always_use_default_target_path: true
             logout:
-                path: /logout
-                target: /
+                path: /admin/logout
+                target: /admin/login
             remember_me:
-                key:        cms
+                key:        admin
                 lifetime:   86400
     access_control:
         - { path: ^/login, roles: IS_AUTHENTICATED_ANONYMOUSLY }
         - { path: ^/, roles: IS_AUTHENTICATED_ANONYMOUSLY}
-        - { path: ^/dashboard, roles: ROLE_ADMIN}
+        - { path: ^/admin, roles: ROLE_ADMIN}
