@@ -1,0 +1,5 @@
+services:
+  aci_app.crawler.rankandfiled:
+    class: ACI\BackendBundle\Services\RankandfiledService
+    arguments: ["@doctrine.orm.entity_manager"]
+

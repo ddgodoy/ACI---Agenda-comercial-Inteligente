@@ -27,6 +27,12 @@ class Country {
      */
     private $name;
 
+    /**
+     * @var string $code
+     * @ORM\Column(name="code", type="string", length=50, nullable=false)
+     */
+    private $code;
+
     public function __construct() {
 
     }
@@ -61,4 +67,27 @@ class Country {
         return $this->name;
     }
 
+
+    /**
+     * Set code
+     *
+     * @param string $code
+     * @return Country
+     */
+    public function setCode($code)
+    {
+        $this->code = $code;
+    
+        return $this;
+    }
+
+    /**
+     * Get code
+     *
+     * @return string 
+     */
+    public function getCode()
+    {
+        return $this->code;
+    }
 }

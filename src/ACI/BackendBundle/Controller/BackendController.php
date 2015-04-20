@@ -33,4 +33,12 @@ class BackendController extends Controller {
 
     }
 
+    /**
+     * @Route("/crawlercountry", name="admin_crawlercountry")
+     * @Template()
+     */
+    public function crawlerCountryAction() {
+        $this->container->get('aci_app.crawler.rankandfiled')->parseHtmlCountries();
+    }
+
 }
