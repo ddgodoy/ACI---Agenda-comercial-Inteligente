@@ -70,7 +70,7 @@ class DebugClassLoader
     }
 
     /**
-     * Finds a file by class name
+     * Finds a file by class name.
      *
      * @param string $class A class name to resolve to file
      *
@@ -86,7 +86,7 @@ class DebugClassLoader
      *
      * @param string $class The name of the class
      *
-     * @return Boolean|null True, if loaded
+     * @return bool|null True, if loaded
      *
      * @throws \RuntimeException
      */

@@ -13,7 +13,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
  * This software consists of voluntary contributions made by many individuals
- * and is licensed under the LGPL. For more information, see
+ * and is licensed under the MIT license. For more information, see
  * <http://www.doctrine-project.org>.
  */
 
@@ -22,6 +22,7 @@ namespace Doctrine\Common\DataFixtures\Executor;
 use Doctrine\ODM\MongoDB\DocumentManager;
 use Doctrine\Common\DataFixtures\Purger\MongoDBPurger;
 use Doctrine\Common\DataFixtures\Event\Listener\MongoDBReferenceListener;
+use Doctrine\Common\DataFixtures\ReferenceRepository;
 
 /**
  * Class responsible for executing data fixtures.
@@ -43,9 +44,31 @@ class MongoDBExecutor extends AbstractExecutor
             $this->purger->setDocumentManager($dm);
         }
         parent::__construct($dm);
-        $dm->getEventManager()->addEventSubscriber(
-            new MongoDBReferenceListener($this->referenceRepository)
+        $this->listener = new MongoDBReferenceListener($this->referenceRepository);
+        $dm->getEventManager()->addEventSubscriber($this->listener);
+    }
+
+    /**
+     * Retrieve the DocumentManager instance this executor instance is using.
+     *
+     * @return \Doctrine\ODM\MongoDB\DocumentManager
+     */
+    public function getObjectManager()
+    {
+        return $this->dm;
+    }
+
+    /** @inheritDoc */
+    public function setReferenceRepository(ReferenceRepository $referenceRepository)
+    {
+        $this->dm->getEventManager()->removeEventListener(
+            $this->listener->getSubscribedEvents(),
+            $this->listener
         );
+
+        $this->referenceRepository = $referenceRepository;
+        $this->listener = new MongoDBReferenceListener($this->referenceRepository);
+        $this->dm->getEventManager()->addEventSubscriber($this->listener);
     }
 
     /** @inheritDoc */

@@ -31,13 +31,22 @@ class MysqliConnection implements Connection
      */
     private $_conn;
 
+    /**
+     * @param array  $params
+     * @param string $username
+     * @param string $password
+     * @param array  $driverOptions
+     *
+     * @throws \Doctrine\DBAL\Driver\Mysqli\MysqliException
+     */
     public function __construct(array $params, $username, $password, array $driverOptions = array())
     {
         $port = isset($params['port']) ? $params['port'] : ini_get('mysqli.default_port');
         $socket = isset($params['unix_socket']) ? $params['unix_socket'] : ini_get('mysqli.default_socket');
+        $dbname = isset($params['dbname']) ? $params['dbname'] : null;
 
         $this->_conn = mysqli_init();
-        if ( ! $this->_conn->real_connect($params['host'], $username, $password, $params['dbname'], $port, $socket)) {
+        if ( ! $this->_conn->real_connect($params['host'], $username, $password, $dbname, $port, $socket)) {
             throw new MysqliException($this->_conn->connect_error, $this->_conn->connect_errno);
         }
 
@@ -47,9 +56,9 @@ class MysqliConnection implements Connection
     }
 
     /**
-     * Retrieve mysqli native resource handle.
+     * Retrieves mysqli native resource handle.
      *
-     * Could be used if part of your application is not using DBAL
+     * Could be used if part of your application is not using DBAL.
      *
      * @return \mysqli
      */

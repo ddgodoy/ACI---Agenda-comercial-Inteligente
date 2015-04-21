@@ -13,11 +13,13 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
  * This software consists of voluntary contributions made by many individuals
- * and is licensed under the LGPL. For more information, see
+ * and is licensed under the MIT license. For more information, see
  * <http://www.doctrine-project.org>.
  */
 
 namespace Doctrine\Common\DataFixtures;
+
+use Doctrine\Common\Persistence\ObjectManager;
 
 /**
  * ReferenceRepository class manages references for
@@ -48,18 +50,44 @@ class ReferenceRepository
     /**
      * Currently used object manager
      *
-     * @var object - object manager
+     * @var Doctrine\Common\Persistence\ObjectManager
      */
     private $manager;
 
     /**
      * Initialize the ReferenceRepository
      *
-     * @param object $manager
+     * @param Doctrine\Common\Persistence\ObjectManager $manager
      */
-    public function __construct($manager)
+    public function __construct(ObjectManager $manager)
     {
         $this->manager = $manager;
+    }
+
+    /**
+     * Get identifier for a unit of work
+     *
+     * @param object $reference Reference object
+     * @param object $uow       Unit of work
+     *
+     * @return array
+     */
+    protected function getIdentifier($reference, $uow)
+    {
+        // In case Reference is not yet managed in UnitOfWork
+        if ( ! $uow->isInIdentityMap($reference)) {
+            $class = $this->manager->getClassMetadata(get_class($reference));
+
+            return $class->getIdentifierValues($reference);
+        }
+
+        // Dealing with ORM UnitOfWork
+        if (method_exists($uow, 'getEntityIdentifier')) {
+            return $uow->getEntityIdentifier($reference);
+        }
+
+        // ODM UnitOfWork
+        return $uow->getDocumentIdentifier($reference);
     }
 
     /**
@@ -76,7 +104,7 @@ class ReferenceRepository
         // in case if reference is set after flush, store its identity
         $uow = $this->manager->getUnitOfWork();
         if ($uow->isInIdentityMap($reference)) {
-            $this->identities[$name] = $uow->getEntityIdentifier($reference);
+            $this->identities[$name] = $this->getIdentifier($reference, $uow);
         }
     }
 
@@ -119,10 +147,15 @@ class ReferenceRepository
      * named by $name
      *
      * @param string $name
+     * @throws OutOfBoundsException - if repository does not exist
      * @return object
      */
     public function getReference($name)
     {
+        if (!$this->hasReference($name)) {
+            throw new \OutOfBoundsException("Reference to: ({$name}) does not exist");
+        }
+
         $reference = $this->references[$name];
         $meta = $this->manager->getClassMetadata(get_class($reference));
         $uow = $this->manager->getUnitOfWork();
@@ -131,21 +164,33 @@ class ReferenceRepository
                 $meta->name,
                 $this->identities[$name]
             );
-            $this->references[$name] = $reference; // allready in identity map
+            $this->references[$name] = $reference; // already in identity map
         }
         return $reference;
     }
 
     /**
-     * Searches for a reference name in the
+     * Check if an object is stored using reference
+     * named by $name
+     *
+     * @param string $name
+     * @return boolean
+     */
+    public function hasReference($name)
+    {
+        return isset($this->references[$name]);
+    }
+
+    /**
+     * Searches for reference names in the
      * list of stored references
      *
      * @param object $reference
-     * @return string
+     * @return array
      */
-    public function getReferenceName($reference)
+    public function getReferenceNames($reference)
     {
-        return array_search($reference, $this->references, true);
+        return array_keys($this->references, $reference, true);
     }
 
     /**
@@ -159,6 +204,16 @@ class ReferenceRepository
     }
 
     /**
+     * Get all stored identities
+     *
+     * @return array
+     */
+    public function getIdentities()
+    {
+        return $this->identities;
+    }
+
+    /**
      * Get all stored references
      *
      * @return array
@@ -166,5 +221,15 @@ class ReferenceRepository
     public function getReferences()
     {
         return $this->references;
+    }
+
+    /**
+     * Get object manager
+     *
+     * @return Doctrine\Common\Persistence\ObjectManager
+     */
+    public function getManager()
+    {
+        return $this->manager;
     }
 }

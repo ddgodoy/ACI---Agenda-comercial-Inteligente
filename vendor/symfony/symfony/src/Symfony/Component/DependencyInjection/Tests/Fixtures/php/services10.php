@@ -6,18 +6,19 @@ use Symfony\Component\DependencyInjection\Exception\InactiveScopeException;
 use Symfony\Component\DependencyInjection\Exception\InvalidArgumentException;
 use Symfony\Component\DependencyInjection\Exception\LogicException;
 use Symfony\Component\DependencyInjection\Exception\RuntimeException;
-use Symfony\Component\DependencyInjection\Reference;
-use Symfony\Component\DependencyInjection\Parameter;
 use Symfony\Component\DependencyInjection\ParameterBag\FrozenParameterBag;
 
 /**
- * ProjectServiceContainer
+ * ProjectServiceContainer.
  *
  * This class has been auto-generated
  * by the Symfony Dependency Injection Component.
  */
 class ProjectServiceContainer extends Container
 {
+    private $parameters;
+    private $targetDirs = array();
+
     /**
      * Constructor.
      */
@@ -36,6 +37,8 @@ class ProjectServiceContainer extends Container
         $this->methodMap = array(
             'test' => 'getTestService',
         );
+
+        $this->aliases = array();
     }
 
     /**
@@ -44,7 +47,7 @@ class ProjectServiceContainer extends Container
      * This service is shared.
      * This method always returns the same instance of the service.
      *
-     * @return stdClass A stdClass instance.
+     * @return \stdClass A stdClass instance.
      */
     protected function getTestService()
     {
@@ -84,7 +87,7 @@ class ProjectServiceContainer extends Container
     }
 
     /**
-     * {@inheritDoc}
+     * {@inheritdoc}
      */
     public function getParameterBag()
     {

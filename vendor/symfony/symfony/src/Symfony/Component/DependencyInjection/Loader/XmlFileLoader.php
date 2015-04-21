@@ -30,14 +30,11 @@ use Symfony\Component\DependencyInjection\Exception\RuntimeException;
 class XmlFileLoader extends FileLoader
 {
     /**
-     * Loads an XML file.
-     *
-     * @param mixed  $file The resource
-     * @param string $type The resource type
+     * {@inheritdoc}
      */
-    public function load($file, $type = null)
+    public function load($resource, $type = null)
     {
-        $path = $this->locator->locate($file);
+        $path = $this->locator->locate($resource);
 
         $xml = $this->parseFile($path);
         $xml->registerXPathNamespace('container', 'http://symfony.com/schema/dic/services');
@@ -61,12 +58,7 @@ class XmlFileLoader extends FileLoader
     }
 
     /**
-     * Returns true if this class supports the given resource.
-     *
-     * @param mixed  $resource A resource
-     * @param string $type     The resource type
-     *
-     * @return Boolean true if this class supports the given resource, false otherwise
+     * {@inheritdoc}
      */
     public function supports($resource, $type = null)
     {
@@ -74,7 +66,7 @@ class XmlFileLoader extends FileLoader
     }
 
     /**
-     * Parses parameters
+     * Parses parameters.
      *
      * @param SimpleXMLElement $xml
      * @param string           $file
@@ -89,7 +81,7 @@ class XmlFileLoader extends FileLoader
     }
 
     /**
-     * Parses imports
+     * Parses imports.
      *
      * @param SimpleXMLElement $xml
      * @param string           $file
@@ -102,12 +94,12 @@ class XmlFileLoader extends FileLoader
 
         foreach ($imports as $import) {
             $this->setCurrentDir(dirname($file));
-            $this->import((string) $import['resource'], null, (Boolean) $import->getAttributeAsPhp('ignore-errors'), $file);
+            $this->import((string) $import['resource'], null, (bool) $import->getAttributeAsPhp('ignore-errors'), $file);
         }
     }
 
     /**
-     * Parses multiple definitions
+     * Parses multiple definitions.
      *
      * @param SimpleXMLElement $xml
      * @param string           $file
@@ -124,7 +116,7 @@ class XmlFileLoader extends FileLoader
     }
 
     /**
-     * Parses an individual Definition
+     * Parses an individual Definition.
      *
      * @param string           $id
      * @param SimpleXMLElement $service
@@ -187,6 +179,10 @@ class XmlFileLoader extends FileLoader
                     continue;
                 }
 
+                if (false !== strpos($name, '-') && false === strpos($name, '_') && !array_key_exists($normalizedName = str_replace('-', '_', $name), $parameters)) {
+                    $parameters[$normalizedName] = SimpleXMLElement::phpize($value);
+                }
+                // keep not normalized key for BC too
                 $parameters[$name] = SimpleXMLElement::phpize($value);
             }
 
@@ -219,7 +215,7 @@ class XmlFileLoader extends FileLoader
     }
 
     /**
-     * Processes anonymous services
+     * Processes anonymous services.
      *
      * @param SimpleXMLElement $xml
      * @param string           $file
@@ -275,7 +271,7 @@ class XmlFileLoader extends FileLoader
      *
      * @param \DOMDocument $dom
      *
-     * @return Boolean
+     * @return bool
      *
      * @throws RuntimeException When extension references a non-existent XSD file
      */

@@ -13,15 +13,14 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
  * This software consists of voluntary contributions made by many individuals
- * and is licensed under the LGPL. For more information, see
+ * and is licensed under the MIT license. For more information, see
  * <http://www.doctrine-project.org>.
  */
 
 namespace Doctrine\Tests\Common\DataFixtures;
 
-require_once __DIR__.'/TestInit.php';
-
 use Doctrine\Common\DataFixtures\FixtureInterface;
+use Doctrine\Common\Persistence\ObjectManager;
 
 /**
  * Test Fixture interface.
@@ -32,7 +31,7 @@ class FixtureTest extends BaseTest
 {
     public function testFixtureInterface()
     {
-        $em = $this->getMockEntityManager();
+        $em = $this->getMock('Doctrine\Common\Persistence\ObjectManager');
         $fixture = new MyFixture2();
         $fixture->load($em);
 
@@ -44,7 +43,7 @@ class MyFixture2 implements FixtureInterface
 {
     public $loaded = false;
 
-    public function load($manager)
+    public function load(ObjectManager $manager)
     {
         $this->loaded = true;
     }

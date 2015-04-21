@@ -11,16 +11,11 @@
 
 namespace Symfony\Component\Console\Helper;
 
-use Symfony\Component\Console\Application;
-use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Descriptor\DescriptorInterface;
 use Symfony\Component\Console\Descriptor\JsonDescriptor;
 use Symfony\Component\Console\Descriptor\MarkdownDescriptor;
 use Symfony\Component\Console\Descriptor\TextDescriptor;
 use Symfony\Component\Console\Descriptor\XmlDescriptor;
-use Symfony\Component\Console\Input\InputArgument;
-use Symfony\Component\Console\Input\InputDefinition;
-use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
 /**
@@ -41,10 +36,10 @@ class DescriptorHelper extends Helper
     public function __construct()
     {
         $this
-            ->register('txt',  new TextDescriptor())
-            ->register('xml',  new XmlDescriptor())
+            ->register('txt', new TextDescriptor())
+            ->register('xml', new XmlDescriptor())
             ->register('json', new JsonDescriptor())
-            ->register('md',   new MarkdownDescriptor())
+            ->register('md', new MarkdownDescriptor())
         ;
     }
 
@@ -53,8 +48,11 @@ class DescriptorHelper extends Helper
      *
      * @param OutputInterface $output
      * @param object          $object
-     * @param string          $format
-     * @param boolean         $raw
+     * @param string|null     $format
+     * @param bool            $raw
+     * @param string|null     $namespace
+     *
+     * @throws \InvalidArgumentException when the given format is not supported
      */
     public function describe(OutputInterface $output, $object, $format = null, $raw = false, $namespace = null)
     {

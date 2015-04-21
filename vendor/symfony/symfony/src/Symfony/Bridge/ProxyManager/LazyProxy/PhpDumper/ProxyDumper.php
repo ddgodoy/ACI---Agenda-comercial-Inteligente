@@ -20,24 +20,24 @@ use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\DependencyInjection\LazyProxy\PhpDumper\DumperInterface;
 
 /**
- * Generates dumped php code of proxies via reflection.
+ * Generates dumped PHP code of proxies via reflection.
  *
  * @author Marco Pivetta <ocramius@gmail.com>
  */
 class ProxyDumper implements DumperInterface
 {
     /**
-     * @var \ProxyManager\ProxyGenerator\LazyLoadingValueHolderGenerator
+     * @var LazyLoadingValueHolderGenerator
      */
     private $proxyGenerator;
 
     /**
-     * @var \ProxyManager\GeneratorStrategy\BaseGeneratorStrategy
+     * @var BaseGeneratorStrategy
      */
     private $classGenerator;
 
     /**
-     * Constructor
+     * Constructor.
      */
     public function __construct()
     {
@@ -46,7 +46,7 @@ class ProxyDumper implements DumperInterface
     }
 
     /**
-     * {@inheritDoc}
+     * {@inheritdoc}
      */
     public function isProxyCandidate(Definition $definition)
     {
@@ -54,7 +54,7 @@ class ProxyDumper implements DumperInterface
     }
 
     /**
-     * {@inheritDoc}
+     * {@inheritdoc}
      */
     public function getProxyFactoryCode(Definition $definition, $id)
     {
@@ -75,9 +75,9 @@ class ProxyDumper implements DumperInterface
 
             $instantiation new $proxyClass(
                 function (&\$wrappedInstance, \ProxyManager\Proxy\LazyLoadingInterface \$proxy) use (\$container) {
-                    \$proxy->setProxyInitializer(null);
-
                     \$wrappedInstance = \$container->$methodName(false);
+
+                    \$proxy->setProxyInitializer(null);
 
                     return true;
                 }
@@ -89,7 +89,7 @@ EOF;
     }
 
     /**
-     * {@inheritDoc}
+     * {@inheritdoc}
      */
     public function getProxyCode(Definition $definition)
     {

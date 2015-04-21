@@ -43,7 +43,10 @@ class DbalLoggerTest extends \PHPUnit_Framework_TestCase
         return array(
             array('SQL', null, array()),
             array('SQL', array(), array()),
-            array('SQL', array('foo' => 'bar'), array('foo' => 'bar'))
+            array('SQL', array('foo' => 'bar'), array('foo' => 'bar')),
+            array('SQL', array('foo' => "\x7F\xFF"), array('foo' => DbalLogger::BINARY_DATA_VALUE)),
+            array('SQL', array('foo' => "bar\x7F\xFF"), array('foo' => DbalLogger::BINARY_DATA_VALUE)),
+            array('SQL', array('foo' => ''), array('foo' => '')),
         );
     }
 
@@ -65,7 +68,7 @@ class DbalLoggerTest extends \PHPUnit_Framework_TestCase
         ;
 
         $dbalLogger->startQuery('SQL', array(
-            'utf8'    => 'foo',
+            'utf8' => 'foo',
             'nonutf8' => "\x7F\xFF",
         ));
     }
@@ -84,7 +87,7 @@ class DbalLoggerTest extends \PHPUnit_Framework_TestCase
         $testString = 'abc';
 
         $shortString = str_pad('', DbalLogger::MAX_STRING_LENGTH, $testString);
-        $longString = str_pad('', DbalLogger::MAX_STRING_LENGTH+1, $testString);
+        $longString = str_pad('', DbalLogger::MAX_STRING_LENGTH + 1, $testString);
 
         $dbalLogger
             ->expects($this->once())
@@ -94,7 +97,7 @@ class DbalLoggerTest extends \PHPUnit_Framework_TestCase
 
         $dbalLogger->startQuery('SQL', array(
             'short' => $shortString,
-            'long'  => $longString,
+            'long' => $longString,
         ));
     }
 
@@ -132,8 +135,7 @@ class DbalLoggerTest extends \PHPUnit_Framework_TestCase
 
         $dbalLogger->startQuery('SQL', array(
                 'short' => $shortString,
-                'long'  => $longString,
+                'long' => $longString,
             ));
     }
-
 }

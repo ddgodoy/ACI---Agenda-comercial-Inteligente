@@ -13,7 +13,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
  * This software consists of voluntary contributions made by many individuals
- * and is licensed under the LGPL. For more information, see
+ * and is licensed under the MIT license. For more information, see
  * <http://www.doctrine-project.org>.
  */
 
@@ -23,8 +23,6 @@ use Doctrine\Common\DataFixtures\ReferenceRepository;
 use Doctrine\Common\DataFixtures\Event\Listener\ORMReferenceListener;
 use Doctrine\ORM\Tools\SchemaTool;
 use Doctrine\ORM\Proxy\Proxy;
-
-require_once __DIR__.'/TestInit.php';
 
 /**
  * Test ReferenceRepository.
@@ -47,7 +45,8 @@ class ReferenceRepositoryTest extends BaseTest
         $referenceRepo->addReference('test', $role);
 
         $references = $referenceRepo->getReferences();
-        $this->assertEquals(1, count($references));
+
+        $this->assertCount(1, $references);
         $this->assertArrayHasKey('test', $references);
         $this->assertInstanceOf(self::TEST_ENTITY_ROLE, $references['test']);
     }
@@ -72,8 +71,8 @@ class ReferenceRepositoryTest extends BaseTest
             ->with('admin-role');
 
         $referenceRepository->expects($this->once())
-            ->method('getReferenceName')
-            ->will($this->returnValue('admin-role'));
+            ->method('getReferenceNames')
+            ->will($this->returnValue(array('admin-role')));
 
         $referenceRepository->expects($this->once())
             ->method('setReferenceIdentity')
@@ -103,11 +102,45 @@ class ReferenceRepositoryTest extends BaseTest
         $roleFixture->load($em);
         // first test against managed state
         $ref = $referenceRepository->getReference('admin-role');
-        $this->assertFalse($ref instanceof Proxy);
+
+        $this->assertNotInstanceOf('Doctrine\ORM\Proxy\Proxy', $ref);
 
         // now test reference reconstruction from identity
         $em->clear();
         $ref = $referenceRepository->getReference('admin-role');
-        $this->assertTrue($ref instanceof Proxy);
+
+        $this->assertInstanceOf('Doctrine\ORM\Proxy\Proxy', $ref);
+    }
+
+    public function testReferenceMultipleEntries()
+    {
+        $em = $this->getMockSqliteEntityManager();
+        $referenceRepository = new ReferenceRepository($em);
+        $em->getEventManager()->addEventSubscriber(new ORMReferenceListener($referenceRepository));
+        $schemaTool = new SchemaTool($em);
+        $schemaTool->createSchema(array($em->getClassMetadata(self::TEST_ENTITY_ROLE)));
+
+        $role = new TestEntity\Role;
+        $role->setName('admin');
+
+        $em->persist($role);
+        $referenceRepository->addReference('admin', $role);
+        $referenceRepository->addReference('duplicate', $role);
+        $em->flush();
+        $em->clear();
+
+        $this->assertInstanceOf('Doctrine\ORM\Proxy\Proxy', $referenceRepository->getReference('admin'));
+        $this->assertInstanceOf('Doctrine\ORM\Proxy\Proxy', $referenceRepository->getReference('duplicate'));
+    }
+
+    /**
+     * @expectedException OutOfBoundsException
+     * @expectedExceptionMessage Reference to: (foo) does not exist
+     */
+    public function testUndefinedReference()
+    {
+        $em = $this->getMockSqliteEntityManager();
+        $referenceRepository = new ReferenceRepository($em);
+        $referenceRepository->getReference('foo');
     }
 }

@@ -13,11 +13,13 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
  * This software consists of voluntary contributions made by many individuals
- * and is licensed under the LGPL. For more information, see
+ * and is licensed under the MIT license. For more information, see
  * <http://www.doctrine-project.org>.
  */
 
 namespace Doctrine\Common\DataFixtures\Purger;
+
+use PHPCR\Util\NodeHelper;
 
 use Doctrine\ODM\PHPCR\DocumentManager;
 
@@ -28,7 +30,10 @@ use Doctrine\ODM\PHPCR\DocumentManager;
  */
 class PHPCRPurger implements PurgerInterface
 {
-    /** DocumentManager instance used for persistence. */
+    /**
+     * DocumentManager instance used for persistence.
+     * @var DocumentManager
+     */
     private $dm;
 
     /**
@@ -52,17 +57,22 @@ class PHPCRPurger implements PurgerInterface
     }
 
     /**
-     * Delete all the nodes in the repository which are not prefixed with jcr:
+     * Retrieve the DocumentManager instance this purger instance is using.
+     *
+     * @return \Doctrine\ODM\PHPCR\DocumentManager
+     */
+    public function getObjectManager()
+    {
+        return $this->dm;
+    }
+
+    /**
+     * @inheritDoc
      */
     public function purge()
     {
         $session = $this->dm->getPhpcrSession();
-        foreach($session->getRootNode()->getNodes() as $node) {
-            if (substr($node->getName(), 0, 4) !== 'jcr:') {
-                $node->remove();
-            }
-        }
+        NodeHelper::purgeWorkspace($session);
         $session->save();
     }
-
 }

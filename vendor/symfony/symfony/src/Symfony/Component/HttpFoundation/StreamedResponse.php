@@ -34,9 +34,9 @@ class StreamedResponse extends Response
     /**
      * Constructor.
      *
-     * @param mixed   $callback A valid PHP callback
-     * @param integer $status   The response status code
-     * @param array   $headers  An array of response headers
+     * @param mixed $callback A valid PHP callback
+     * @param int   $status   The response status code
+     * @param array $headers  An array of response headers
      *
      * @api
      */
@@ -51,7 +51,7 @@ class StreamedResponse extends Response
     }
 
     /**
-     * {@inheritDoc}
+     * {@inheritdoc}
      */
     public static function create($callback = null, $status = 200, $headers = array())
     {

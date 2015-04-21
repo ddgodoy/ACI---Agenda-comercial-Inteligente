@@ -13,7 +13,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
  * This software consists of voluntary contributions made by many individuals
- * and is licensed under the LGPL. For more information, see
+ * and is licensed under the MIT license. For more information, see
  * <http://www.doctrine-project.org>.
  */
 
@@ -35,7 +35,7 @@ abstract class AbstractFixture implements SharedFixtureInterface
      * 
      * @var ReferenceRepository
      */
-    private $referenceRepository;
+    protected $referenceRepository;
     
     /**
      * {@inheritdoc}
@@ -63,11 +63,14 @@ abstract class AbstractFixture implements SharedFixtureInterface
     /**
      * Set the reference entry identified by $name
      * and referenced to managed $object. If $name
-     * already is set, it overrides it
+     * already is set, it throws a 
+     * BadMethodCallException exception
      * 
      * @param string $name
      * @param object $object - managed object
      * @see Doctrine\Common\DataFixtures\ReferenceRepository::addReference
+     * @throws BadMethodCallException - if repository already has
+     *      a reference by $name
      * @return void
      */
     public function addReference($name, $object)
@@ -86,5 +89,18 @@ abstract class AbstractFixture implements SharedFixtureInterface
     public function getReference($name)
     {
         return $this->referenceRepository->getReference($name);
+    }
+    
+    /**
+     * Check if an object is stored using reference
+     * named by $name
+     * 
+     * @param string $name
+     * @see Doctrine\Common\DataFixtures\ReferenceRepository::hasReference
+     * @return boolean
+     */
+    public function hasReference($name)
+    {
+        return $this->referenceRepository->hasReference($name);
     }
 }

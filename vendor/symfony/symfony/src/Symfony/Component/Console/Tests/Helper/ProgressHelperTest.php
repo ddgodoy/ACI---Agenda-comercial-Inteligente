@@ -88,8 +88,8 @@ class ProgressHelperTest extends \PHPUnit_Framework_TestCase
 
         rewind($output->getStream());
         $this->assertEquals(
-            $this->generateOutput('  0/50 [>---------------------------]   0%') .
-            $this->generateOutput('  1/50 [>---------------------------]   2%') .
+            $this->generateOutput('  0/50 [>---------------------------]   0%').
+            $this->generateOutput('  1/50 [>---------------------------]   2%').
             $this->generateOutput('  2/50 [=>--------------------------]     '),
             stream_get_contents($output->getStream())
         );
@@ -106,9 +106,9 @@ class ProgressHelperTest extends \PHPUnit_Framework_TestCase
 
         rewind($output->getStream());
         $this->assertEquals(
-            $this->generateOutput('  0/50 [>---------------------------]   0%') .
-            $this->generateOutput('  1/50 [>---------------------------]   2%') .
-            $this->generateOutput(' 15/50 [========>-------------------]  30%') .
+            $this->generateOutput('  0/50 [>---------------------------]   0%').
+            $this->generateOutput('  1/50 [>---------------------------]   2%').
+            $this->generateOutput(' 15/50 [========>-------------------]  30%').
             $this->generateOutput(' 25/50 [==============>-------------]  50%'),
             stream_get_contents($output->getStream())
         );
@@ -136,6 +136,21 @@ class ProgressHelperTest extends \PHPUnit_Framework_TestCase
         $progress->setCurrent(10);
     }
 
+    public function testRedrawFrequency()
+    {
+        $progress = $this->getMock('Symfony\Component\Console\Helper\ProgressHelper', array('display'));
+        $progress->expects($this->exactly(4))
+                 ->method('display');
+
+        $progress->setRedrawFrequency(2);
+
+        $progress->start($output = $this->getOutputStream(), 6);
+        $progress->setCurrent(1);
+        $progress->advance(2);
+        $progress->advance(2);
+        $progress->advance(1);
+    }
+
     public function testMultiByteSupport()
     {
         if (!function_exists('mb_strlen') || (false === $encoding = mb_detect_encoding('■'))) {
@@ -149,6 +164,18 @@ class ProgressHelperTest extends \PHPUnit_Framework_TestCase
 
         rewind($output->getStream());
         $this->assertEquals($this->generateOutput('    3 [■■■>------------------------]'), stream_get_contents($output->getStream()));
+    }
+
+    public function testPercentNotHundredBeforeComplete()
+    {
+        $progress = new ProgressHelper();
+        $progress->start($output = $this->getOutputStream(), 200);
+        $progress->display();
+        $progress->advance(199);
+        $progress->advance();
+
+        rewind($output->getStream());
+        $this->assertEquals($this->generateOutput('   0/200 [>---------------------------]   0%').$this->generateOutput(' 199/200 [===========================>]  99%').$this->generateOutput(' 200/200 [============================] 100%'), stream_get_contents($output->getStream()));
     }
 
     protected function getOutputStream()

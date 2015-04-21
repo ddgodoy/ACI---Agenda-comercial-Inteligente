@@ -13,7 +13,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
  * This software consists of voluntary contributions made by many individuals
- * and is licensed under the LGPL. For more information, see
+ * and is licensed under the MIT license. For more information, see
  * <http://www.doctrine-project.org>.
  */
 
@@ -45,14 +45,35 @@ class PHPCRExecutor extends AbstractExecutor
         parent::__construct($dm);
     }
 
+    /**
+     * Retrieve the DocumentManager instance this executor instance is using.
+     *
+     * @return \Doctrine\ODM\PHPCR\DocumentManager
+     */
+    public function getObjectManager()
+    {
+        return $this->dm;
+    }
+
     /** @inheritDoc */
     public function execute(array $fixtures, $append = false)
     {
-        if ($append === false) {
-            $this->purge();
-        }
-        foreach ($fixtures as $fixture) {
-            $this->load($this->dm, $fixture);
+        $that = $this;
+
+        $function = function ($dm) use ($append, $that, $fixtures) {
+            if ($append === false) {
+                $that->purge();
+            }
+
+            foreach ($fixtures as $fixture) {
+                $that->load($dm, $fixture);
+            }
+        };
+
+        if (method_exists($this->dm, 'transactional')) {
+            $this->dm->transactional($function);
+        } else {
+            $function($this->dm);
         }
     }
 }

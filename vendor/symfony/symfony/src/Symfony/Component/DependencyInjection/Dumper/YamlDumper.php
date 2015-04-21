@@ -60,7 +60,7 @@ class YamlDumper extends Dumper
     }
 
     /**
-     * Adds a service
+     * Adds a service.
      *
      * @param string     $id
      * @param Definition $definition
@@ -74,6 +74,10 @@ class YamlDumper extends Dumper
             $code .= sprintf("        class: %s\n", $definition->getClass());
         }
 
+        if (!$definition->isPublic()) {
+            $code .= "        public: false\n";
+        }
+
         $tagsCode = '';
         foreach ($definition->getTags() as $name => $tags) {
             foreach ($tags as $attributes) {
@@ -81,7 +85,7 @@ class YamlDumper extends Dumper
                 foreach ($attributes as $key => $value) {
                     $att[] = sprintf('%s: %s', $this->dumper->dump($key), $this->dumper->dump($value));
                 }
-                $att = $att ? ', '.implode(' ', $att) : '';
+                $att = $att ? ', '.implode(', ', $att) : '';
 
                 $tagsCode .= sprintf("            - { name: %s%s }\n", $this->dumper->dump($name), $att);
             }
@@ -150,7 +154,7 @@ class YamlDumper extends Dumper
     }
 
     /**
-     * Adds a service alias
+     * Adds a service alias.
      *
      * @param string $alias
      * @param Alias  $id
@@ -167,7 +171,7 @@ class YamlDumper extends Dumper
     }
 
     /**
-     * Adds services
+     * Adds services.
      *
      * @return string
      */
@@ -194,7 +198,7 @@ class YamlDumper extends Dumper
     }
 
     /**
-     * Adds parameters
+     * Adds parameters.
      *
      * @return string
      */
@@ -210,7 +214,7 @@ class YamlDumper extends Dumper
     }
 
     /**
-     * Dumps the value to YAML format
+     * Dumps the value to YAML format.
      *
      * @param mixed $value
      *
@@ -270,8 +274,8 @@ class YamlDumper extends Dumper
     /**
      * Prepares parameters.
      *
-     * @param array   $parameters
-     * @param Boolean $escape
+     * @param array $parameters
+     * @param bool  $escape
      *
      * @return array
      */
@@ -292,7 +296,7 @@ class YamlDumper extends Dumper
     }
 
     /**
-     * Escapes arguments
+     * Escapes arguments.
      *
      * @param array $arguments
      *

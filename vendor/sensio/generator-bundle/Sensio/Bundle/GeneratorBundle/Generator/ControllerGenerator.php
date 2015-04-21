@@ -53,7 +53,7 @@ class ControllerGenerator extends Generator
 
         foreach ($actions as $i => $action) {
             // get the actioname without the sufix Action (for the template logical name)
-            $actions[$i]['basename'] = $basename = substr($action['name'], 0, -6);
+            $actions[$i]['basename'] = substr($action['name'], 0, -6);
             $params = $parameters;
             $params['action'] = $actions[$i];
 
@@ -64,9 +64,9 @@ class ControllerGenerator extends Generator
             }
 
             if ('twig' == $templateFormat) {
-                $this->renderFile('controller/Template.html.twig', $dir.'/Resources/views/'.$this->parseTemplatePath($template), $params);
+                $this->renderFile('controller/Template.html.twig.twig', $dir.'/Resources/views/'.$this->parseTemplatePath($template), $params);
             } else {
-                $this->renderFile('controller/Template.html.php', $dir.'/Resources/views/'.$this->parseTemplatePath($template), $params);
+                $this->renderFile('controller/Template.html.php.twig', $dir.'/Resources/views/'.$this->parseTemplatePath($template), $params);
             }
 
             $this->generateRouting($bundle, $controller, $actions[$i], $routeFormat);
@@ -74,8 +74,8 @@ class ControllerGenerator extends Generator
 
         $parameters['actions'] = $actions;
 
-        $this->renderFile('controller/Controller.php', $controllerFile, $parameters);
-        $this->renderFile('controller/ControllerTest.php', $dir.'/Tests/Controller/'.$controller.'ControllerTest.php', $parameters);
+        $this->renderFile('controller/Controller.php.twig', $controllerFile, $parameters);
+        $this->renderFile('controller/ControllerTest.php.twig', $dir.'/Tests/Controller/'.$controller.'ControllerTest.php', $parameters);
     }
 
     public function generateRouting(BundleInterface $bundle, $controller, array $action, $format)
@@ -102,7 +102,7 @@ class ControllerGenerator extends Generator
             }
 
             $content .= sprintf(
-                "\n%s:\n    pattern: %s\n    defaults: { _controller: %s }\n",
+                "\n%s:\n    path:     %s\n    defaults: { _controller: %s }\n",
                 $name,
                 $action['route'],
                 $controller
@@ -124,7 +124,7 @@ EOT;
 
             $route = $sxe->addChild('route');
             $route->addAttribute('id', $name);
-            $route->addAttribute('pattern', $action['route']);
+            $route->addAttribute('path', $action['route']);
 
             $default = $route->addChild('default', $controller);
             $default->addAttribute('key', '_controller');
@@ -146,7 +146,7 @@ EOT;
                 $content = substr($content, 0, $pointer);
                 $content .= sprintf("%s->add('%s', new Route('%s', array(", $collection[1], $name, $action['route']);
                 $content .= sprintf("\n    '_controller' => '%s',", $controller);
-                $content .= "\n)));\n\nreturn ".$collection[1];
+                $content .= "\n)));\n\nreturn ".$collection[1].";";
             } else {
                 // new file
                 $content = <<<EOT
@@ -158,7 +158,7 @@ use Symfony\Component\Routing\Route;
 EOT;
                 $content .= sprintf("\n\$collection->add('%s', new Route('%s', array(", $name, $action['route']);
                 $content .= sprintf("\n    '_controller' => '%s',", $controller);
-                $content .= "\n)));\n\nreturn \$collection";
+                $content .= "\n)));\n\nreturn \$collection;";
             }
         }
 

@@ -13,7 +13,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
  * This software consists of voluntary contributions made by many individuals
- * and is licensed under the LGPL. For more information, see
+ * and is licensed under the MIT license. For more information, see
  * <http://www.doctrine-project.org>.
  */
 
@@ -22,7 +22,7 @@ namespace Doctrine\Common\DataFixtures;
 /**
  * Ordered Fixture interface needs to be implemented
  * by fixtures, which needs to have a specific order
- * when beeing loaded by directory scan for example
+ * when being loaded by directory scan for example
  * 
  * @author Gediminas Morkevicius <gediminas.morkevicius@gmail.com>
  * @author Jonathan H. Wage <jonwage@gmail.com>
@@ -34,5 +34,5 @@ interface OrderedFixtureInterface
      * 
      * @return integer
      */  
-    function getOrder();
+    public function getOrder();
 }

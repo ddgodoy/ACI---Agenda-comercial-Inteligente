@@ -19,6 +19,7 @@ use Symfony\Component\HttpKernel\KernelInterface;
 use Sensio\Bundle\GeneratorBundle\Generator\BundleGenerator;
 use Sensio\Bundle\GeneratorBundle\Manipulator\KernelManipulator;
 use Sensio\Bundle\GeneratorBundle\Manipulator\RoutingManipulator;
+use Sensio\Bundle\GeneratorBundle\Command\Helper\DialogHelper;
 
 /**
  * Generates bundles.
@@ -27,8 +28,6 @@ use Sensio\Bundle\GeneratorBundle\Manipulator\RoutingManipulator;
  */
 class GenerateBundleCommand extends GeneratorCommand
 {
-    private $generator;
-
     /**
      * @see Command
      */
@@ -91,7 +90,8 @@ EOT
             }
         }
 
-        $namespace = Validators::validateBundleNamespace($input->getOption('namespace'));
+        // validate the namespace, but don't require a vendor namespace
+        $namespace = Validators::validateBundleNamespace($input->getOption('namespace'), false);
         if (!$bundle = $input->getOption('bundle-name')) {
             $bundle = strtr($namespace, array('\\' => ''));
         }
@@ -137,7 +137,8 @@ EOT
         // namespace
         $namespace = null;
         try {
-            $namespace = $input->getOption('namespace') ? Validators::validateBundleNamespace($input->getOption('namespace')) : null;
+            // validate the namespace option (if any) but don't require the vendor namespace
+            $namespace = $input->getOption('namespace') ? Validators::validateBundleNamespace($input->getOption('namespace'), false) : null;
         } catch (\Exception $error) {
             $output->writeln($dialog->getHelperSet()->get('formatter')->formatBlock($error->getMessage(), 'error'));
         }
@@ -161,7 +162,41 @@ EOT
                 '',
             ));
 
-            $namespace = $dialog->askAndValidate($output, $dialog->getQuestion('Bundle namespace', $input->getOption('namespace')), array('Sensio\Bundle\GeneratorBundle\Command\Validators', 'validateBundleNamespace'), false, $input->getOption('namespace'));
+            $acceptedNamespace = false;
+            while (!$acceptedNamespace) {
+                $namespace = $dialog->askAndValidate(
+                    $output,
+                    $dialog->getQuestion('Bundle namespace', $input->getOption('namespace')),
+                    function ($namespace) use ($dialog, $output) {
+                        // validate it, but don't require the vendor namespace
+                        return Validators::validateBundleNamespace($namespace, false);
+                    },
+                    false,
+                    $input->getOption('namespace')
+                );
+
+                // mark as accepted, unless they want to try again below
+                $acceptedNamespace = true;
+
+                // see if there is a vendor namespace. If not, this could be accidental
+                if (false === strpos($namespace, '\\')) {
+                    // language is (almost) duplicated in Validators
+                    $msg = array();
+                    $msg[] = '';
+                    $msg[] = sprintf('The namespace sometimes contain a vendor namespace (e.g. <info>VendorName/BlogBundle</info> instead of simply <info>%s</info>).', $namespace, $namespace);
+                    $msg[] = 'If you\'ve *did* type a vendor namespace, try using a forward slash <info>/</info> (<info>Acme/BlogBundle</info>)?';
+                    $msg[] = '';
+                    $output->writeln($msg);
+
+                    $acceptedNamespace = $dialog->askConfirmation(
+                        $output,
+                        $dialog->getQuestion(
+                            sprintf('Keep <comment>%s</comment> as the bundle namespace (choose no to try again)?', $namespace),
+                            'yes'
+                        )
+                    );
+                }
+            }
             $input->setOption('namespace', $namespace);
         }
 
@@ -263,7 +298,7 @@ EOT
         }
     }
 
-    protected function updateKernel($dialog, InputInterface $input, OutputInterface $output, KernelInterface $kernel, $namespace, $bundle)
+    protected function updateKernel(DialogHelper $dialog, InputInterface $input, OutputInterface $output, KernelInterface $kernel, $namespace, $bundle)
     {
         $auto = true;
         if ($input->isInteractive()) {
@@ -294,7 +329,7 @@ EOT
         }
     }
 
-    protected function updateRouting($dialog, InputInterface $input, OutputInterface $output, $bundle, $format)
+    protected function updateRouting(DialogHelper $dialog, InputInterface $input, OutputInterface $output, $bundle, $format)
     {
         $auto = true;
         if ($input->isInteractive()) {
@@ -304,7 +339,7 @@ EOT
         $output->write('Importing the bundle routing resource: ');
         $routing = new RoutingManipulator($this->getContainer()->getParameter('kernel.root_dir').'/config/routing.yml');
         try {
-            $ret = $auto ? $routing->addResource($bundle, $format) : false;
+            $ret = $auto ? $routing->addResource($bundle, $format) : true;
             if (!$ret) {
                 if ('annotation' === $format) {
                     $help = sprintf("        <comment>resource: \"@%s/Controller/\"</comment>\n        <comment>type:     annotation</comment>\n", $bundle);

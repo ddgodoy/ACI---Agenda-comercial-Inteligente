@@ -11,6 +11,7 @@
 
 namespace Sensio\Bundle\GeneratorBundle\Command;
 
+use Symfony\Component\HttpKernel\Bundle\BundleInterface;
 use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
 use Sensio\Bundle\GeneratorBundle\Command\Helper\DialogHelper;
 use Sensio\Bundle\GeneratorBundle\Generator\Generator;
@@ -30,9 +31,9 @@ abstract class GeneratorCommand extends ContainerAwareCommand
         $this->generator = $generator;
     }
 
-    protected abstract function createGenerator();
+    abstract protected function createGenerator();
 
-    protected function getGenerator($bundle = null)
+    protected function getGenerator(BundleInterface $bundle = null)
     {
         if (null === $this->generator) {
             $this->generator = $this->createGenerator();
@@ -42,7 +43,7 @@ abstract class GeneratorCommand extends ContainerAwareCommand
         return $this->generator;
     }
 
-    protected function getSkeletonDirs($bundle = null)
+    protected function getSkeletonDirs(BundleInterface $bundle = null)
     {
         $skeletonDirs = array();
 

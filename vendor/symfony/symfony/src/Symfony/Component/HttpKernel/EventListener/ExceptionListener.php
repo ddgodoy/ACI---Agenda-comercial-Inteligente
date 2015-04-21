@@ -12,11 +12,11 @@
 namespace Symfony\Component\HttpKernel\EventListener;
 
 use Psr\Log\LoggerInterface;
+use Symfony\Component\Debug\Exception\FlattenException;
 use Symfony\Component\HttpKernel\Log\DebugLoggerInterface;
 use Symfony\Component\HttpKernel\Event\GetResponseForExceptionEvent;
 use Symfony\Component\HttpKernel\KernelEvents;
 use Symfony\Component\HttpKernel\HttpKernelInterface;
-use Symfony\Component\HttpKernel\Exception\FlattenException;
 use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
@@ -53,9 +53,12 @@ class ExceptionListener implements EventSubscriberInterface
 
         $attributes = array(
             '_controller' => $this->controller,
-            'exception'   => FlattenException::create($exception),
-            'logger'      => $this->logger instanceof DebugLoggerInterface ? $this->logger : null,
-            'format'      => $request->getRequestFormat(),
+            'exception' => FlattenException::create($exception),
+            'logger' => $this->logger instanceof DebugLoggerInterface ? $this->logger : null,
+            // keep for BC -- as $format can be an argument of the controller callable
+            // see src/Symfony/Bundle/TwigBundle/Controller/ExceptionController.php
+            // @deprecated in 2.4, to be removed in 3.0
+            'format' => $request->getRequestFormat(),
         );
 
         $request = $request->duplicate(null, null, $attributes);
@@ -64,13 +67,13 @@ class ExceptionListener implements EventSubscriberInterface
         try {
             $response = $event->getKernel()->handle($request, HttpKernelInterface::SUB_REQUEST, true);
         } catch (\Exception $e) {
-            $this->logException($exception, sprintf('Exception thrown when handling an exception (%s: %s)', get_class($e), $e->getMessage()), false);
+            $this->logException($e, sprintf('Exception thrown when handling an exception (%s: %s at %s line %s)', get_class($e), $e->getMessage(), $e->getFile(), $e->getLine()), false);
 
             // set handling to false otherwise it wont be able to handle further more
             $handling = false;
 
-            // re-throw the exception from within HttpKernel as this is a catch-all
-            return;
+            // throwing $e, not $exception, is on purpose: fixing error handling code paths is the most important
+            throw $e;
         }
 
         $event->setResponse($response);
@@ -88,9 +91,9 @@ class ExceptionListener implements EventSubscriberInterface
     /**
      * Logs an exception.
      *
-     * @param \Exception $exception The original \Exception instance
+     * @param \Exception $exception The \Exception instance
      * @param string     $message   The error message to log
-     * @param Boolean    $original  False when the handling of the exception thrown another exception
+     * @param bool       $original  False when the handling of the exception thrown another exception
      */
     protected function logException(\Exception $exception, $message, $original = true)
     {

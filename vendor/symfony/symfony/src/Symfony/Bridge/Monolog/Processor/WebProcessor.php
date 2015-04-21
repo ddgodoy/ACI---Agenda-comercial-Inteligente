@@ -12,12 +12,11 @@
 namespace Symfony\Bridge\Monolog\Processor;
 
 use Monolog\Processor\WebProcessor as BaseWebProcessor;
-use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Event\GetResponseEvent;
 use Symfony\Component\HttpKernel\HttpKernelInterface;
 
 /**
- * WebProcessor override to read from the HttpFoundation's Request
+ * WebProcessor override to read from the HttpFoundation's Request.
  *
  * @author Jordi Boggiano <j.boggiano@seld.be>
  */

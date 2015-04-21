@@ -18,21 +18,14 @@ use Symfony\Component\HttpKernel\HttpKernelInterface;
 
 class WebProcessorTest extends \PHPUnit_Framework_TestCase
 {
-    protected function setUp()
-    {
-        if (!class_exists('Monolog\\Logger')) {
-            $this->markTestSkipped('Monolog is not available.');
-        }
-    }
-
     public function testUsesRequestServerData()
     {
         $server = array(
-            'REQUEST_URI'    => 'A',
-            'REMOTE_ADDR'    => 'B',
+            'REQUEST_URI' => 'A',
+            'REMOTE_ADDR' => 'B',
             'REQUEST_METHOD' => 'C',
-            'SERVER_NAME'    => 'D',
-            'HTTP_REFERER'   => 'E'
+            'SERVER_NAME' => 'D',
+            'HTTP_REFERER' => 'E',
         );
 
         $request = new Request();
@@ -60,8 +53,8 @@ class WebProcessorTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @param integer $level
-     * @param string  $message
+     * @param int    $level
+     * @param string $message
      *
      * @return array Record
      */

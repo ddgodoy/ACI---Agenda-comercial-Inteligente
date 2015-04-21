@@ -13,13 +13,12 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
  * This software consists of voluntary contributions made by many individuals
- * and is licensed under the LGPL. For more information, see
+ * and is licensed under the MIT license. For more information, see
  * <http://www.doctrine-project.org>.
  */
 
 namespace Doctrine\Common\DataFixtures;
 
-use Doctrine\ORM\EntityManager;
 use Doctrine\Common\DataFixtures\Exception\CircularReferenceException;
 
 /**
@@ -41,7 +40,7 @@ class Loader
      *
      * @var array
      */
-    private $orderedFixtures;
+    private $orderedFixtures = array();
 
     /**
      * Determines if we must order fixtures by number
@@ -68,7 +67,7 @@ class Loader
      * Find fixtures classes in a given directory and load them.
      *
      * @param string $dir Directory to find fixture classes in.
-     * @return array $fixtures Array of loaded fixture object instances
+     * @return array $fixtures Array of loaded fixture object instances.
      */
     public function loadFromDirectory($dir)
     {
@@ -76,41 +75,45 @@ class Loader
             throw new \InvalidArgumentException(sprintf('"%s" does not exist', $dir));
         }
 
-        $fixtures = array();
-        $includedFiles = array();
-
         $iterator = new \RecursiveIteratorIterator(
             new \RecursiveDirectoryIterator($dir),
             \RecursiveIteratorIterator::LEAVES_ONLY
         );
+        return $this->loadFromIterator($iterator);
+    }
 
-        foreach ($iterator as $file) {
-            if (($fileName = $file->getBasename($this->fileExtension)) == $file->getBasename()) {
-                continue;
-            }
-            $sourceFile = realpath($file->getPathName());
-            require_once $sourceFile;
-            $includedFiles[] = $sourceFile;
+    /**
+     * Find fixtures classes in a given file and load them.
+     *
+     * @param string $fileName File to find fixture classes in.
+     * @return array $fixtures Array of loaded fixture object instances.
+     */
+    public function loadFromFile($fileName)
+    {
+        if (!is_readable($fileName)) {
+            throw new \InvalidArgumentException(sprintf('"%s" does not exist or is not readable', $fileName));
         }
-        $declared = get_declared_classes();
-        
-        foreach ($declared as $className) {
-            $reflClass = new \ReflectionClass($className);
-            $sourceFile = $reflClass->getFileName();
-            
-            if (in_array($sourceFile, $includedFiles) && ! $this->isTransient($className)) {
-                $fixture = new $className;
-                $fixtures[] = $fixture;
-                $this->addFixture($fixture);
-            }
-        }
-        return $fixtures;
+
+        $iterator = new \ArrayIterator(array(new \SplFileInfo($fileName)));
+        return $this->loadFromIterator($iterator);
+    }
+
+    /**
+     * Has fixture?
+     *
+     * @param FixtureInterface $fixture
+     *
+     * @return boolean
+     */
+    public function hasFixture($fixture)
+    {
+        return isset($this->fixtures[get_class($fixture)]);
     }
 
     /**
      * Add a fixture object instance to the loader.
      *
-     * @param object $fixture
+     * @param FixtureInterface $fixture
      */
     public function addFixture(FixtureInterface $fixture)
     {
@@ -122,13 +125,20 @@ class Loader
                     get_class($fixture),
                     'OrderedFixtureInterface',
                     'DependentFixtureInterface'));
-            } elseif ($fixture instanceof OrderedFixtureInterface) {
-                $this->orderFixturesByNumber = true;
-            } elseif ($fixture instanceof DependentFixtureInterface) {
-                $this->orderFixturesByDependencies = true;
             }
 
             $this->fixtures[$fixtureClass] = $fixture;
+
+            if ($fixture instanceof OrderedFixtureInterface) {
+                $this->orderFixturesByNumber = true;
+            } elseif ($fixture instanceof DependentFixtureInterface) {
+                $this->orderFixturesByDependencies = true;
+                foreach($fixture->getDependencies() as $class) {
+                    if (class_exists($class)) {
+                        $this->addFixture(new $class);
+                    }
+                }
+            }
         }
     }
 
@@ -139,6 +149,8 @@ class Loader
      */
     public function getFixtures()
     {
+        $this->orderedFixtures = array();
+
         if ($this->orderFixturesByNumber) {
             $this->orderFixturesByNumber();
         }
@@ -285,7 +297,7 @@ class Loader
             }
         }
 
-        $this->orderedFixtures = is_array($this->orderedFixtures) ? array_merge($this->orderedFixtures, $orderedFixtures) : $orderedFixtures;
+        $this->orderedFixtures = array_merge($this->orderedFixtures, $orderedFixtures);
     }
 
     private function validateDependencies($dependenciesClasses)
@@ -294,7 +306,7 @@ class Loader
         
         foreach ($dependenciesClasses as $class) {
             if (!in_array($class, $loadedFixtureClasses)) {
-                throw new \RuntimeException(sprintf('Fixture "%s" was declared as a dependency, but it doesn\'t exist.', $class));
+                throw new \RuntimeException(sprintf('Fixture "%s" was declared as a dependency, but it should be added in fixture loader first.', $class));
             }
         }
 
@@ -316,5 +328,39 @@ class Loader
         }
 
         return $unsequencedClasses;
-    }           
+    }
+
+    /**
+     * Load fixtures from files contained in iterator.
+     *
+     * @param \Iterator $iterator Iterator over files from which fixtures should be loaded.
+     * @return array $fixtures Array of loaded fixture object instances.
+     */
+    private function loadFromIterator(\Iterator $iterator)
+    {
+        $includedFiles = array();
+        foreach ($iterator as $file) {
+            if (($fileName = $file->getBasename($this->fileExtension)) == $file->getBasename()) {
+                continue;
+            }
+            $sourceFile = realpath($file->getPathName());
+            require_once $sourceFile;
+            $includedFiles[] = $sourceFile;
+        }
+
+        $fixtures = array();
+        $declared = get_declared_classes();
+        foreach ($declared as $className) {
+            $reflClass = new \ReflectionClass($className);
+            $sourceFile = $reflClass->getFileName();
+
+            if (in_array($sourceFile, $includedFiles) && ! $this->isTransient($className)) {
+                $fixture = new $className;
+                $fixtures[] = $fixture;
+                $this->addFixture($fixture);
+            }
+        }
+
+        return $fixtures;
+    }
 }

@@ -40,7 +40,7 @@ class ApacheUrlMatcherTest extends \PHPUnit_Framework_TestCase
 
         $_SERVER = $server;
 
-        $result = $matcher->match($pathinfo, $server);
+        $result = $matcher->match($pathinfo);
         $this->assertSame(var_export($expect, true), var_export($result, true));
     }
 
@@ -88,6 +88,21 @@ class ApacheUrlMatcherTest extends \PHPUnit_Framework_TestCase
                     'name' => 'world',
                     '_controller' => 'AcmeBundle:Default:index',
                     '_route' => 'hello',
+                ),
+            ),
+            array(
+                'Redirect with many ignored attributes',
+                '/legacy/{cat1}/{cat2}/{id}.html',
+                array(
+                    '_ROUTING_route' => 'product_view',
+                    '_ROUTING_param__controller' => 'FrameworkBundle:Redirect:redirect',
+                    '_ROUTING_default_ignoreAttributes[0]' => 'attr_a',
+                    '_ROUTING_default_ignoreAttributes[1]' => 'attr_b',
+                ),
+                array(
+                    'ignoreAttributes' => array('attr_a', 'attr_b'),
+                    '_controller' => 'FrameworkBundle:Redirect:redirect',
+                    '_route' => 'product_view',
                 ),
             ),
             array(

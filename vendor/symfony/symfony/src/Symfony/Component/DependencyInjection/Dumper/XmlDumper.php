@@ -119,6 +119,9 @@ class XmlDumper extends Dumper
         if ($definition->getFactoryMethod()) {
             $service->setAttribute('factory-method', $definition->getFactoryMethod());
         }
+        if ($definition->getFactoryClass()) {
+            $service->setAttribute('factory-class', $definition->getFactoryClass());
+        }
         if ($definition->getFactoryService()) {
             $service->setAttribute('factory-service', $definition->getFactoryService());
         }
@@ -271,7 +274,7 @@ class XmlDumper extends Dumper
     }
 
     /**
-     * Escapes arguments
+     * Escapes arguments.
      *
      * @param array $arguments
      *

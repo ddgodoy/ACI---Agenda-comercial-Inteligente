@@ -13,7 +13,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
  * This software consists of voluntary contributions made by many individuals
- * and is licensed under the LGPL. For more information, see
+ * and is licensed under the MIT license. For more information, see
  * <http://www.doctrine-project.org>.
  */
 
@@ -51,6 +51,16 @@ class MongoDBPurger implements PurgerInterface
         $this->dm = $dm;
     }
 
+    /**
+     * Retrieve the DocumentManager instance this purger instance is using.
+     *
+     * @return \Doctrine\ODM\MongoDB\DocumentManager
+     */
+    public function getObjectManager()
+    {
+        return $this->dm;
+    }
+
     /** @inheritDoc */
     public function purge()
     {
@@ -60,5 +70,6 @@ class MongoDBPurger implements PurgerInterface
                 $this->dm->getDocumentCollection($metadata->name)->drop();
             }
         }
+        $this->dm->getSchemaManager()->ensureIndexes();
     }
 }

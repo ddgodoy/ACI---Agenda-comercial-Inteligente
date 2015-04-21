@@ -57,7 +57,7 @@ class Route implements \Serializable
     private $options = array();
 
     /**
-     * @var null|RouteCompiler
+     * @var null|CompiledRoute
      */
     private $compiled;
 
@@ -95,22 +95,29 @@ class Route implements \Serializable
         }
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function serialize()
     {
         return serialize(array(
-            'path'         => $this->path,
-            'host'         => $this->host,
-            'defaults'     => $this->defaults,
+            'path' => $this->path,
+            'host' => $this->host,
+            'defaults' => $this->defaults,
             'requirements' => $this->requirements,
-            'options'      => $this->options,
-            'schemes'      => $this->schemes,
-            'methods'      => $this->methods,
+            'options' => $this->options,
+            'schemes' => $this->schemes,
+            'methods' => $this->methods,
+            'compiled' => $this->compiled,
         ));
     }
 
-    public function unserialize($data)
+    /**
+     * {@inheritdoc}
+     */
+    public function unserialize($serialized)
     {
-        $data = unserialize($data);
+        $data = unserialize($serialized);
         $this->path = $data['path'];
         $this->host = $data['host'];
         $this->defaults = $data['defaults'];
@@ -118,6 +125,9 @@ class Route implements \Serializable
         $this->options = $data['options'];
         $this->schemes = $data['schemes'];
         $this->methods = $data['methods'];
+        if (isset($data['compiled'])) {
+            $this->compiled = $data['compiled'];
+        }
     }
 
     /**
@@ -242,10 +252,22 @@ class Route implements \Serializable
     }
 
     /**
+     * Checks if a scheme requirement has been set.
+     *
+     * @param string $scheme
+     *
+     * @return bool true if the scheme requirement exists, otherwise false
+     */
+    public function hasScheme($scheme)
+    {
+        return in_array(strtolower($scheme), $this->schemes, true);
+    }
+
+    /**
      * Returns the uppercased HTTP methods this route is restricted to.
      * So an empty array means that any method is allowed.
      *
-     * @return array The schemes
+     * @return array The methods
      */
     public function getMethods()
     {
@@ -358,11 +380,11 @@ class Route implements \Serializable
     }
 
     /**
-     * Checks if an option has been set
+     * Checks if an option has been set.
      *
      * @param string $name An option name
      *
-     * @return Boolean true if the option is set, false otherwise
+     * @return bool true if the option is set, false otherwise
      */
     public function hasOption($name)
     {
@@ -431,7 +453,7 @@ class Route implements \Serializable
      *
      * @param string $name A variable name
      *
-     * @return Boolean true if the default value is set, false otherwise
+     * @return bool true if the default value is set, false otherwise
      */
     public function hasDefault($name)
     {
@@ -518,7 +540,7 @@ class Route implements \Serializable
      *
      * @param string $key A variable name
      *
-     * @return Boolean true if a requirement is specified, false otherwise
+     * @return bool true if a requirement is specified, false otherwise
      */
     public function hasRequirement($key)
     {

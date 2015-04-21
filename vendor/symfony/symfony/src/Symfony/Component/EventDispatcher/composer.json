@@ -19,7 +19,8 @@
         "php": ">=5.3.3"
     },
     "require-dev": {
-        "symfony/dependency-injection": "~2.0"
+        "symfony/phpunit-bridge": "~2.7",
+        "symfony/dependency-injection": "~2.0,>=2.0.5"
     },
     "suggest": {
         "symfony/dependency-injection": "",

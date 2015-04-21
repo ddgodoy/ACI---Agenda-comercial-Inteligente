@@ -13,7 +13,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
  * This software consists of voluntary contributions made by many individuals
- * and is licensed under the LGPL. For more information, see
+ * and is licensed under the MIT license. For more information, see
  * <http://www.doctrine-project.org>.
  */
 
@@ -22,8 +22,7 @@ namespace Doctrine\Tests\Common\DataFixtures;
 use Doctrine\Common\DataFixtures\Loader;
 use Doctrine\Common\DataFixtures\OrderedFixtureInterface;
 use Doctrine\Common\DataFixtures\FixtureInterface;
-
-require_once __DIR__.'/TestInit.php';
+use Doctrine\Common\Persistence\ObjectManager;
 
 /**
  * Test Fixture ordering.
@@ -41,17 +40,18 @@ class OrderedFixtureTest extends BaseTest
         $loader->addFixture(new BaseFixture1);
 
         $orderedFixtures = $loader->getFixtures();
-        $this->assertEquals(4, count($orderedFixtures));
-        $this->assertTrue($orderedFixtures[0] instanceof BaseFixture1);
-        $this->assertTrue($orderedFixtures[1] instanceof OrderedFixture2);
-        $this->assertTrue($orderedFixtures[2] instanceof OrderedFixture1);
-        $this->assertTrue($orderedFixtures[3] instanceof OrderedFixture3);
+
+        $this->assertCount(4, $orderedFixtures);
+        $this->assertInstanceOf(__NAMESPACE__ . '\BaseFixture1', $orderedFixtures[0]);
+        $this->assertInstanceOf(__NAMESPACE__ . '\OrderedFixture2', $orderedFixtures[1]);
+        $this->assertInstanceOf(__NAMESPACE__ . '\OrderedFixture1', $orderedFixtures[2]);
+        $this->assertInstanceOf(__NAMESPACE__ . '\OrderedFixture3', $orderedFixtures[3]);
     }
 }
 
 class OrderedFixture1 implements FixtureInterface, OrderedFixtureInterface
 {
-    public function load($manager)
+    public function load(ObjectManager $manager)
     {}
 
     public function getOrder()
@@ -62,7 +62,7 @@ class OrderedFixture1 implements FixtureInterface, OrderedFixtureInterface
 
 class OrderedFixture2 implements FixtureInterface, OrderedFixtureInterface
 {
-    public function load($manager)
+    public function load(ObjectManager $manager)
     {}
 
     public function getOrder()
@@ -73,7 +73,7 @@ class OrderedFixture2 implements FixtureInterface, OrderedFixtureInterface
 
 class OrderedFixture3 implements FixtureInterface, OrderedFixtureInterface
 {
-    public function load($manager)
+    public function load(ObjectManager $manager)
     {}
 
     public function getOrder()
@@ -84,6 +84,6 @@ class OrderedFixture3 implements FixtureInterface, OrderedFixtureInterface
 
 class BaseFixture1 implements FixtureInterface
 {
-    public function load($manager)
+    public function load(ObjectManager $manager)
     {}
 }

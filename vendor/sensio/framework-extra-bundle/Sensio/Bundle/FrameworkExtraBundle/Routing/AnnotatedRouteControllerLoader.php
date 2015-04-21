@@ -1,20 +1,20 @@
 <?php
 
+/*
+ * This file is part of the Symfony package.
+ *
+ * (c) Fabien Potencier <fabien@symfony.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace Sensio\Bundle\FrameworkExtraBundle\Routing;
 
 use Symfony\Component\Routing\Loader\AnnotationClassLoader;
 use Symfony\Component\Routing\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route as FrameworkExtraBundleRoute;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
-
-/*
- * This file is part of the Symfony framework.
- *
- * (c) Fabien Potencier <fabien@symfony.com>
- *
- * This source file is subject to the MIT license that is bundled
- * with this source code in the file LICENSE.
- */
 
 /**
  * AnnotatedRouteControllerLoader is an implementation of AnnotationClassLoader
@@ -27,7 +27,7 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 class AnnotatedRouteControllerLoader extends AnnotationClassLoader
 {
     /**
-     * Configures the _controller default parameter and eventually the _method
+     * Configures the _controller default parameter and eventually the HTTP method
      * requirement of a given Route instance.
      *
      * @param Route             $route  A route instance
@@ -50,18 +50,31 @@ class AnnotatedRouteControllerLoader extends AnnotationClassLoader
         // requirements (@Method)
         foreach ($this->reader->getMethodAnnotations($method) as $configuration) {
             if ($configuration instanceof Method) {
-                $route->setRequirement('_method', implode('|', $configuration->getMethods()));
+                $route->setMethods(implode('|', $configuration->getMethods()));
             } elseif ($configuration instanceof FrameworkExtraBundleRoute && $configuration->getService()) {
                 throw new \LogicException('The service option can only be specified at class level.');
             }
         }
     }
 
+    protected function getGlobals(\ReflectionClass $class)
+    {
+        $globals = parent::getGlobals($class);
+
+        foreach ($this->reader->getClassAnnotations($class) as $configuration) {
+            if ($configuration instanceof Method) {
+                $globals['methods'] = array_merge($globals['methods'], $configuration->getMethods());
+            }
+        }
+
+        return $globals;
+    }
+
     /**
      * Makes the default route name more sane by removing common keywords.
      *
-     * @param  \ReflectionClass  $class  A ReflectionClass instance
-     * @param  \ReflectionMethod $method A ReflectionMethod instance
+     * @param \ReflectionClass  $class  A ReflectionClass instance
+     * @param \ReflectionMethod $method A ReflectionMethod instance
      *
      * @return string The default route name
      */
@@ -72,11 +85,11 @@ class AnnotatedRouteControllerLoader extends AnnotationClassLoader
         return preg_replace(array(
             '/(bundle|controller)_/',
             '/action(_\d+)?$/',
-            '/__/'
+            '/__/',
         ), array(
             '_',
             '\\1',
-            '_'
+            '_',
         ), $routeName);
     }
 }

@@ -24,8 +24,8 @@ use Symfony\Component\DependencyInjection\Loader\PhpFileLoader;
 use Symfony\Component\DependencyInjection\Loader\ClosureLoader;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpKernel\HttpKernelInterface;
 use Symfony\Component\HttpKernel\Bundle\BundleInterface;
+use Symfony\Component\HttpKernel\Config\EnvParametersResource;
 use Symfony\Component\HttpKernel\Config\FileLocator;
 use Symfony\Component\HttpKernel\DependencyInjection\MergeExtensionConfigurationPass;
 use Symfony\Component\HttpKernel\DependencyInjection\AddClassesToCachePass;
@@ -58,32 +58,30 @@ abstract class Kernel implements KernelInterface, TerminableInterface
     protected $booted;
     protected $name;
     protected $startTime;
-    protected $classes;
     protected $loadClassCache;
 
-    const VERSION         = '2.3.1';
-    const VERSION_ID      = '20301';
-    const MAJOR_VERSION   = '2';
-    const MINOR_VERSION   = '3';
-    const RELEASE_VERSION = '1';
-    const EXTRA_VERSION   = '';
+    const VERSION = '2.3.27';
+    const VERSION_ID = '20327';
+    const MAJOR_VERSION = '2';
+    const MINOR_VERSION = '3';
+    const RELEASE_VERSION = '27';
+    const EXTRA_VERSION = '';
 
     /**
      * Constructor.
      *
-     * @param string  $environment The environment
-     * @param Boolean $debug       Whether to enable debugging or not
+     * @param string $environment The environment
+     * @param bool   $debug       Whether to enable debugging or not
      *
      * @api
      */
     public function __construct($environment, $debug)
     {
         $this->environment = $environment;
-        $this->debug = (Boolean) $debug;
+        $this->debug = (bool) $debug;
         $this->booted = false;
         $this->rootDir = $this->getRootDir();
         $this->name = $this->getName();
-        $this->classes = array();
         $this->bundles = array();
 
         if ($this->debug) {
@@ -191,7 +189,7 @@ abstract class Kernel implements KernelInterface, TerminableInterface
     }
 
     /**
-     * Gets a http kernel from the container
+     * Gets a HTTP kernel from the container.
      *
      * @return HttpKernel
      */
@@ -245,35 +243,9 @@ abstract class Kernel implements KernelInterface, TerminableInterface
     }
 
     /**
-     * Returns the file path for a given resource.
+     * {@inheritDoc}
      *
-     * A Resource can be a file or a directory.
-     *
-     * The resource name must follow the following pattern:
-     *
-     *     @<BundleName>/path/to/a/file.something
-     *
-     * where BundleName is the name of the bundle
-     * and the remaining part is the relative path in the bundle.
-     *
-     * If $dir is passed, and the first segment of the path is "Resources",
-     * this method will look for a file named:
-     *
-     *     $dir/<BundleName>/path/without/Resources
-     *
-     * before looking in the bundle resource folder.
-     *
-     * @param string  $name  A resource name to locate
-     * @param string  $dir   A directory where to look for the resource first
-     * @param Boolean $first Whether to return the first path or paths for all matching bundles
-     *
-     * @return string|array The absolute path of the resource or an array if $first is false
-     *
-     * @throws \InvalidArgumentException if the file cannot be found or the name is not valid
-     * @throws \RuntimeException         if the name contains invalid/unsafe
-     * @throws \RuntimeException         if a custom resource is hidden by a resource in a derived bundle
-     *
-     * @api
+     * @throws \RuntimeException if a custom resource is hidden by a resource in a derived bundle
      */
     public function locateResource($name, $dir = null, $first = true)
     {
@@ -499,7 +471,9 @@ abstract class Kernel implements KernelInterface, TerminableInterface
         }
 
         // look for orphans
-        if (count($diff = array_values(array_diff(array_keys($directChildren), array_keys($this->bundles))))) {
+        if (!empty($directChildren) && count($diff = array_diff_key($directChildren, $this->bundles))) {
+            $diff = array_keys($diff);
+
             throw new \LogicException(sprintf('Bundle "%s" extends bundle "%s", which is not registered.', $directChildren[$diff[0]], $diff[0]));
         }
 
@@ -520,7 +494,6 @@ abstract class Kernel implements KernelInterface, TerminableInterface
                 array_pop($bundleMap);
             }
         }
-
     }
 
     /**
@@ -588,14 +561,14 @@ abstract class Kernel implements KernelInterface, TerminableInterface
 
         return array_merge(
             array(
-                'kernel.root_dir'        => $this->rootDir,
-                'kernel.environment'     => $this->environment,
-                'kernel.debug'           => $this->debug,
-                'kernel.name'            => $this->name,
-                'kernel.cache_dir'       => $this->getCacheDir(),
-                'kernel.logs_dir'        => $this->getLogDir(),
-                'kernel.bundles'         => $bundles,
-                'kernel.charset'         => $this->getCharset(),
+                'kernel.root_dir' => realpath($this->rootDir) ?: $this->rootDir,
+                'kernel.environment' => $this->environment,
+                'kernel.debug' => $this->debug,
+                'kernel.name' => $this->name,
+                'kernel.cache_dir' => realpath($this->getCacheDir()) ?: $this->getCacheDir(),
+                'kernel.logs_dir' => realpath($this->getLogDir()) ?: $this->getLogDir(),
+                'kernel.bundles' => $bundles,
+                'kernel.charset' => $this->getCharset(),
                 'kernel.container_class' => $this->getContainerClass(),
             ),
             $this->getEnvParameters()
@@ -632,7 +605,7 @@ abstract class Kernel implements KernelInterface, TerminableInterface
     {
         foreach (array('cache' => $this->getCacheDir(), 'logs' => $this->getLogDir()) as $name => $dir) {
             if (!is_dir($dir)) {
-                if (false === @mkdir($dir, 0777, true)) {
+                if (false === @mkdir($dir, 0777, true) && !is_dir($dir)) {
                     throw new \RuntimeException(sprintf("Unable to create the %s directory (%s)\n", $name, $dir));
                 }
             } elseif (!is_writable($dir)) {
@@ -649,6 +622,7 @@ abstract class Kernel implements KernelInterface, TerminableInterface
         }
 
         $container->addCompilerPass(new AddClassesToCachePass($this));
+        $container->addResource(new EnvParametersResource('SYMFONY__'));
 
         return $container;
     }
@@ -712,9 +686,9 @@ abstract class Kernel implements KernelInterface, TerminableInterface
             $dumper->setProxyDumper(new ProxyDumper());
         }
 
-        $content = $dumper->dump(array('class' => $class, 'base_class' => $baseClass));
+        $content = $dumper->dump(array('class' => $class, 'base_class' => $baseClass, 'file' => (string) $cache));
         if (!$this->debug) {
-            $content = self::stripComments($content);
+            $content = static::stripComments($content);
         }
 
         $cache->write($content, $container->getResources());
@@ -760,23 +734,39 @@ abstract class Kernel implements KernelInterface, TerminableInterface
         $rawChunk = '';
         $output = '';
         $tokens = token_get_all($source);
+        $ignoreSpace = false;
         for (reset($tokens); false !== $token = current($tokens); next($tokens)) {
             if (is_string($token)) {
                 $rawChunk .= $token;
             } elseif (T_START_HEREDOC === $token[0]) {
-                $output .= preg_replace(array('/\s+$/Sm', '/\n+/S'), "\n", $rawChunk).$token[1];
+                $output .= $rawChunk.$token[1];
                 do {
                     $token = next($tokens);
                     $output .= $token[1];
                 } while ($token[0] !== T_END_HEREDOC);
                 $rawChunk = '';
-            } elseif (!in_array($token[0], array(T_COMMENT, T_DOC_COMMENT))) {
+            } elseif (T_WHITESPACE === $token[0]) {
+                if ($ignoreSpace) {
+                    $ignoreSpace = false;
+
+                    continue;
+                }
+
+                // replace multiple new lines with a single newline
+                $rawChunk .= preg_replace(array('/\n{2,}/S'), "\n", $token[1]);
+            } elseif (in_array($token[0], array(T_COMMENT, T_DOC_COMMENT))) {
+                $ignoreSpace = true;
+            } else {
                 $rawChunk .= $token[1];
+
+                // The PHP-open tag already has a new-line
+                if (T_OPEN_TAG === $token[0]) {
+                    $ignoreSpace = true;
+                }
             }
         }
 
-        // replace multiple new lines with a single newline
-        $output .= preg_replace(array('/\s+$/Sm', '/\n+/S'), "\n", $rawChunk);
+        $output .= $rawChunk;
 
         return $output;
     }

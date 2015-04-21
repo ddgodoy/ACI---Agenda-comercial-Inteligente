@@ -13,15 +13,14 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
  * This software consists of voluntary contributions made by many individuals
- * and is licensed under the LGPL. For more information, see
+ * and is licensed under the MIT license. For more information, see
  * <http://www.doctrine-project.org>.
  */
 
 namespace Doctrine\Tests\Common\DataFixtures;
 
-require_once __DIR__.'/TestInit.php';
-
 use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\Tools\Setup;
 use PHPUnit_Framework_TestCase;
 
 /**
@@ -68,38 +67,9 @@ abstract class BaseTest extends PHPUnit_Framework_TestCase
      */
     protected function getMockAnnotationReaderEntityManager()
     {
-        $driver = $this->getMock('Doctrine\DBAL\Driver');
-        $driver->expects($this->once())
-            ->method('getDatabasePlatform')
-            ->will($this->returnValue($this->getMock('Doctrine\DBAL\Platforms\MySqlPlatform')));
-
-        $conn = $this->getMock('Doctrine\DBAL\Connection', array(), array(array(), $driver));
-        $conn->expects($this->once())
-            ->method('getEventManager')
-            ->will($this->returnValue($this->getMock('Doctrine\Common\EventManager')));
-
-        $config = $this->getMock('Doctrine\ORM\Configuration');
-        $config->expects($this->once())
-            ->method('getProxyDir')
-            ->will($this->returnValue('test'));
-
-        $config->expects($this->once())
-            ->method('getProxyNamespace')
-            ->will($this->returnValue('Proxies'));
-
-        $reader = new \Doctrine\Common\Annotations\AnnotationReader();
-        $reader->setDefaultAnnotationNamespace('Doctrine\ORM\Mapping\\');
-        $mappingDriver = new \Doctrine\ORM\Mapping\Driver\AnnotationDriver(
-            $reader,
-            __DIR__ . '/TestEntity'
-        );
-
-        $config->expects($this->any())
-            ->method('getMetadataDriverImpl')
-            ->will($this->returnValue($mappingDriver));
-
-        $em = EntityManager::create($conn, $config);
-        return $em;
+        $dbParams = array('driver' => 'pdo_sqlite', 'memory' => true);
+        $config = Setup::createAnnotationMetadataConfiguration(array(__DIR__.'/TestEntity'), true);
+        return EntityManager::create($dbParams, $config);
     }
 
     /**
@@ -111,33 +81,8 @@ abstract class BaseTest extends PHPUnit_Framework_TestCase
      */
     protected function getMockSqliteEntityManager()
     {
-        $conn = array(
-            'driver' => 'pdo_sqlite',
-            'memory' => true,
-        );
-
-        $config = $this->getMock('Doctrine\ORM\Configuration');
-        $config->expects($this->once())
-            ->method('getProxyDir')
-            ->will($this->returnValue(sys_get_temp_dir()));
-
-        $config->expects($this->once())
-            ->method('getProxyNamespace')
-            ->will($this->returnValue('Proxy'));
-
-        $config->expects($this->once())
-            ->method('getAutoGenerateProxyClasses')
-            ->will($this->returnValue(true));
-
-        $reader = new \Doctrine\Common\Annotations\AnnotationReader();
-        $reader->setDefaultAnnotationNamespace('Doctrine\ORM\Mapping\\');
-        $mappingDriver = new \Doctrine\ORM\Mapping\Driver\AnnotationDriver($reader);
-
-        $config->expects($this->any())
-            ->method('getMetadataDriverImpl')
-            ->will($this->returnValue($mappingDriver));
-
-        $em = EntityManager::create($conn, $config);
-        return $em;
+        $dbParams = array('driver' => 'pdo_sqlite', 'memory' => true);
+        $config = Setup::createAnnotationMetadataConfiguration(array(__DIR__.'/TestEntity'), true);
+        return EntityManager::create($dbParams, $config);
     }
 }

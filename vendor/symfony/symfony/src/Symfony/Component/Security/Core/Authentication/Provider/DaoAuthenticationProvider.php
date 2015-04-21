@@ -38,7 +38,7 @@ class DaoAuthenticationProvider extends UserAuthenticationProvider
      * @param UserCheckerInterface    $userChecker                An UserCheckerInterface instance
      * @param string                  $providerKey                The provider key
      * @param EncoderFactoryInterface $encoderFactory             An EncoderFactoryInterface instance
-     * @param Boolean                 $hideUserNotFoundExceptions Whether to hide user not found exception or not
+     * @param bool                    $hideUserNotFoundExceptions Whether to hide user not found exception or not
      */
     public function __construct(UserProviderInterface $userProvider, UserCheckerInterface $userChecker, $providerKey, EncoderFactoryInterface $encoderFactory, $hideUserNotFoundExceptions = true)
     {
@@ -59,7 +59,7 @@ class DaoAuthenticationProvider extends UserAuthenticationProvider
                 throw new BadCredentialsException('The credentials were changed from another session.');
             }
         } else {
-            if ("" === ($presentedPassword = $token->getCredentials())) {
+            if ('' === ($presentedPassword = $token->getCredentials())) {
                 throw new BadCredentialsException('The presented password cannot be empty.');
             }
 

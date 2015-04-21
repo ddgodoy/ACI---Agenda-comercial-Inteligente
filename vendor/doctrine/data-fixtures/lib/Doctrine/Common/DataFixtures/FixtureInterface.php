@@ -13,11 +13,13 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
  * This software consists of voluntary contributions made by many individuals
- * and is licensed under the LGPL. For more information, see
+ * and is licensed under the MIT license. For more information, see
  * <http://www.doctrine-project.org>.
  */
 
 namespace Doctrine\Common\DataFixtures;
+
+use Doctrine\Common\Persistence\ObjectManager;
 
 /**
  * Interface contract for fixture classes to implement.
@@ -29,7 +31,7 @@ interface FixtureInterface
     /**
      * Load data fixtures with the passed EntityManager
      *
-     * @param object $manager
+     * @param ObjectManager $manager
      */
-    public function load($manager);
+    public function load(ObjectManager $manager);
 }

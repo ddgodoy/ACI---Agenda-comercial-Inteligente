@@ -13,9 +13,10 @@ namespace Symfony\Component\Form\Tests\Extension\Core\Type;
 
 use Symfony\Component\Form\Extension\Core\View\ChoiceView;
 use Symfony\Component\Form\FormError;
+use Symfony\Component\Form\Test\TypeTestCase as TestCase;
 use Symfony\Component\Intl\Util\IntlTestHelper;
 
-class DateTypeTest extends TypeTestCase
+class DateTypeTest extends TestCase
 {
     protected function setUp()
     {
@@ -272,7 +273,30 @@ class DateTypeTest extends TypeTestCase
     }
 
     /**
-     * This test is to check that the strings '0', '1', '2', '3' are no accepted
+     * @dataProvider provideDateFormats
+     */
+    public function testDatePatternWithFormatOption($format, $pattern)
+    {
+        $form = $this->factory->create('date', null, array(
+            'format' => $format,
+        ));
+
+        $view = $form->createView();
+
+        $this->assertEquals($pattern, $view->vars['date_pattern']);
+    }
+
+    public function provideDateFormats()
+    {
+        return array(
+            array('dMy', '{{ day }}{{ month }}{{ year }}'),
+            array('d-M-yyyy', '{{ day }}-{{ month }}-{{ year }}'),
+            array('M d y', '{{ month }} {{ day }} {{ year }}'),
+        );
+    }
+
+    /**
+     * This test is to check that the strings '0', '1', '2', '3' are not accepted
      * as valid IntlDateFormatter constants for FULL, LONG, MEDIUM or SHORT respectively.
      *
      * @expectedException \Symfony\Component\OptionsResolver\Exception\InvalidOptionsException
@@ -314,6 +338,36 @@ class DateTypeTest extends TypeTestCase
     {
         $this->factory->create('date', null, array(
             'format' => array(),
+        ));
+    }
+
+    /**
+     * @expectedException \Symfony\Component\OptionsResolver\Exception\InvalidOptionsException
+     */
+    public function testThrowExceptionIfYearsIsInvalid()
+    {
+        $this->factory->create('date', null, array(
+            'years' => 'bad value',
+        ));
+    }
+
+    /**
+     * @expectedException \Symfony\Component\OptionsResolver\Exception\InvalidOptionsException
+     */
+    public function testThrowExceptionIfMonthsIsInvalid()
+    {
+        $this->factory->create('date', null, array(
+            'months' => 'bad value',
+        ));
+    }
+
+    /**
+     * @expectedException \Symfony\Component\OptionsResolver\Exception\InvalidOptionsException
+     */
+    public function testThrowExceptionIfDaysIsInvalid()
+    {
+        $this->factory->create('date', null, array(
+            'days' => 'bad value',
         ));
     }
 
@@ -389,7 +443,7 @@ class DateTypeTest extends TypeTestCase
 
         $this->assertEquals(array(
             new ChoiceView('1', '1', 'Jän'),
-            new ChoiceView('4', '4', 'Apr.')
+            new ChoiceView('4', '4', 'Apr.'),
         ), $view['month']->vars['choices']);
     }
 
@@ -531,7 +585,7 @@ class DateTypeTest extends TypeTestCase
     public function testPassDatePatternToViewDifferentPattern()
     {
         $form = $this->factory->create('date', null, array(
-            'format' => 'MMyyyydd'
+            'format' => 'MMyyyydd',
         ));
 
         $view = $form->createView();
@@ -542,7 +596,7 @@ class DateTypeTest extends TypeTestCase
     public function testPassDatePatternToViewDifferentPatternWithSeparators()
     {
         $form = $this->factory->create('date', null, array(
-            'format' => 'MM*yyyy*dd'
+            'format' => 'MM*yyyy*dd',
         ));
 
         $view = $form->createView();
@@ -754,5 +808,26 @@ class DateTypeTest extends TypeTestCase
 
         $this->assertSame(array(), $form['day']->getErrors());
         $this->assertSame(array($error), $form->getErrors());
+    }
+
+    public function testYearsFor32BitsMachines()
+    {
+        if (4 !== PHP_INT_SIZE) {
+            $this->markTestSkipped(
+                'PHP must be compiled in 32 bit mode to run this test');
+        }
+
+        $form = $this->factory->create('date', null, array(
+            'years' => range(1900, 2040),
+        ));
+
+        $view = $form->createView();
+
+        $listChoices = array();
+        foreach (range(1902, 2037) as $y) {
+            $listChoices[] = new ChoiceView($y, $y, $y);
+        }
+
+        $this->assertEquals($listChoices, $view['year']->vars['choices']);
     }
 }

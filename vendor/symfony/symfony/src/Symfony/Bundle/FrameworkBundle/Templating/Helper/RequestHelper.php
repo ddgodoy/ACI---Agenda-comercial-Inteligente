@@ -41,7 +41,7 @@ class RequestHelper extends Helper
      *
      * @return mixed
      *
-     * @see Symfony\Component\HttpFoundation\Request::get()
+     * @see Request::get()
      */
     public function getParameter($key, $default = null)
     {
@@ -49,7 +49,7 @@ class RequestHelper extends Helper
     }
 
     /**
-     * Returns the locale
+     * Returns the locale.
      *
      * @return string
      */

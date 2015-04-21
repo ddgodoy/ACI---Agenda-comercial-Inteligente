@@ -37,7 +37,7 @@ class HttpKernel implements HttpKernelInterface, TerminableInterface
     protected $resolver;
 
     /**
-     * Constructor
+     * Constructor.
      *
      * @param EventDispatcherInterface    $dispatcher An EventDispatcherInterface instance
      * @param ControllerResolverInterface $resolver   A ControllerResolverInterface instance
@@ -52,7 +52,7 @@ class HttpKernel implements HttpKernelInterface, TerminableInterface
 
     /**
      * {@inheritdoc}
-     * 
+     *
      * @api
      */
     public function handle(Request $request, $type = HttpKernelInterface::MASTER_REQUEST, $catch = true)
@@ -84,11 +84,11 @@ class HttpKernel implements HttpKernelInterface, TerminableInterface
      * Exceptions are not caught.
      *
      * @param Request $request A Request instance
-     * @param integer $type    The type of the request (one of HttpKernelInterface::MASTER_REQUEST or HttpKernelInterface::SUB_REQUEST)
+     * @param int     $type    The type of the request (one of HttpKernelInterface::MASTER_REQUEST or HttpKernelInterface::SUB_REQUEST)
      *
      * @return Response A Response instance
      *
-     * @throws \LogicException If one of the listener does not behave as expected
+     * @throws \LogicException       If one of the listener does not behave as expected
      * @throws NotFoundHttpException When controller cannot be found
      */
     private function handleRaw(Request $request, $type = self::MASTER_REQUEST)
@@ -144,7 +144,7 @@ class HttpKernel implements HttpKernelInterface, TerminableInterface
      *
      * @param Response $response A Response instance
      * @param Request  $request  An error message in case the response is not a Response object
-     * @param integer  $type     The type of the request (one of HttpKernelInterface::MASTER_REQUEST or HttpKernelInterface::SUB_REQUEST)
+     * @param int      $type     The type of the request (one of HttpKernelInterface::MASTER_REQUEST or HttpKernelInterface::SUB_REQUEST)
      *
      * @return Response The filtered Response instance
      *
@@ -164,7 +164,7 @@ class HttpKernel implements HttpKernelInterface, TerminableInterface
      *
      * @param \Exception $e       An \Exception instance
      * @param Request    $request A Request instance
-     * @param integer    $type    The type of the request
+     * @param int        $type    The type of the request
      *
      * @return Response A Response instance
      *
@@ -219,7 +219,7 @@ class HttpKernel implements HttpKernelInterface, TerminableInterface
                 $a[] = sprintf('%s => %s', $k, $this->varToString($v));
             }
 
-            return sprintf("Array(%s)", implode(', ', $a));
+            return sprintf('Array(%s)', implode(', ', $a));
         }
 
         if (is_resource($var)) {

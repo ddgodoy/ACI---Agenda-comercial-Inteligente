@@ -11,7 +11,6 @@
 
 namespace Symfony\Component\Intl\Tests\Globals;
 
-
 /**
  * Test case for intl function implementations.
  *
@@ -21,7 +20,7 @@ abstract class AbstractIntlGlobalsTest extends \PHPUnit_Framework_TestCase
 {
     public function errorNameProvider()
     {
-        return array (
+        return array(
             array(-129, '[BOGUS UErrorCode]'),
             array(0, 'U_ZERO_ERROR'),
             array(1, 'U_ILLEGAL_ARGUMENT_ERROR'),

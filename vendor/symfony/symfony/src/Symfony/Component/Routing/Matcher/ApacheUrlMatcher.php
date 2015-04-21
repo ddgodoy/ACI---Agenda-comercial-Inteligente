@@ -39,7 +39,7 @@ class ApacheUrlMatcher extends UrlMatcher
         $allow = array();
         $route = null;
 
-        foreach ($_SERVER as $key => $value) {
+        foreach ($this->denormalizeValues($_SERVER) as $key => $value) {
             $name = $key;
 
             // skip non-routing variables
@@ -60,8 +60,8 @@ class ApacheUrlMatcher extends UrlMatcher
                 continue;
             }
             if (false !== $pos = strpos($name, '_', 9)) {
-                $type = substr($name, 9, $pos-9);
-                $name = substr($name, $pos+1);
+                $type = substr($name, 9, $pos - 9);
+                $name = substr($name, $pos + 1);
             } else {
                 $type = substr($name, 9);
             }
@@ -90,5 +90,29 @@ class ApacheUrlMatcher extends UrlMatcher
         } else {
             return parent::match($pathinfo);
         }
+    }
+
+    /**
+     * Denormalizes an array of values.
+     *
+     * @param string[] $values
+     *
+     * @return array
+     */
+    private function denormalizeValues(array $values)
+    {
+        $normalizedValues = array();
+        foreach ($values as $key => $value) {
+            if (preg_match('~^(.*)\[(\d+)\]$~', $key, $matches)) {
+                if (!isset($normalizedValues[$matches[1]])) {
+                    $normalizedValues[$matches[1]] = array();
+                }
+                $normalizedValues[$matches[1]][(int) $matches[2]] = $value;
+            } else {
+                $normalizedValues[$key] = $value;
+            }
+        }
+
+        return $normalizedValues;
     }
 }

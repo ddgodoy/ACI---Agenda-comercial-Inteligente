@@ -22,11 +22,11 @@ use Symfony\Component\Config\Resource\FileResource;
  *
  * @api
  */
-class CsvFileLoader extends ArrayLoader implements LoaderInterface
+class CsvFileLoader extends ArrayLoader
 {
     private $delimiter = ';';
     private $enclosure = '"';
-    private $escape    = '\\';
+    private $escape = '\\';
 
     /**
      * {@inheritdoc}
@@ -66,7 +66,7 @@ class CsvFileLoader extends ArrayLoader implements LoaderInterface
             if (count($data) == 2) {
                 $messages[$data[0]] = $data[1];
             } else {
-                 continue;
+                continue;
             }
         }
 
@@ -87,6 +87,6 @@ class CsvFileLoader extends ArrayLoader implements LoaderInterface
     {
         $this->delimiter = $delimiter;
         $this->enclosure = $enclosure;
-        $this->escape    = $escape;
+        $this->escape = $escape;
     }
 }

@@ -11,7 +11,6 @@
 
 namespace Symfony\Component\HttpFoundation\Tests\Session\Storage;
 
-use Symfony\Component\HttpFoundation\Session\Storage\Handler\NativeSessionHandler;
 use Symfony\Component\HttpFoundation\Session\Storage\PhpBridgeSessionStorage;
 use Symfony\Component\HttpFoundation\Session\Attribute\AttributeBag;
 
@@ -23,15 +22,16 @@ use Symfony\Component\HttpFoundation\Session\Attribute\AttributeBag;
  * These tests require separate processes.
  *
  * @runTestsInSeparateProcesses
+ * @preserveGlobalState disabled
  */
-class PhpSessionStorageTest extends \PHPUnit_Framework_TestCase
+class PhpBridgeSessionStorageTest extends \PHPUnit_Framework_TestCase
 {
     private $savePath;
 
     protected function setUp()
     {
-        ini_set('session.save_handler', 'files');
-        ini_set('session.save_path', $this->savePath = sys_get_temp_dir().'/sf2test');
+        $this->iniSet('session.save_handler', 'files');
+        $this->iniSet('session.save_path', $this->savePath = sys_get_temp_dir().'/sf2test');
         if (!is_dir($this->savePath)) {
             mkdir($this->savePath);
         }
@@ -54,14 +54,14 @@ class PhpSessionStorageTest extends \PHPUnit_Framework_TestCase
     protected function getStorage()
     {
         $storage = new PhpBridgeSessionStorage();
-        $storage->registerBag(new AttributeBag);
+        $storage->registerBag(new AttributeBag());
 
         return $storage;
     }
 
     public function testPhpSession53()
     {
-        if (version_compare(phpversion(), '5.4.0', '>=')) {
+        if (PHP_VERSION_ID >= 50400) {
             $this->markTestSkipped('Test skipped, for PHP 5.3 only.');
         }
 
@@ -85,7 +85,7 @@ class PhpSessionStorageTest extends \PHPUnit_Framework_TestCase
 
     public function testPhpSession54()
     {
-        if (version_compare(phpversion(), '5.4.0', '<')) {
+        if (PHP_VERSION_ID < 50400) {
             $this->markTestSkipped('Test skipped, for PHP 5.4 only.');
         }
 

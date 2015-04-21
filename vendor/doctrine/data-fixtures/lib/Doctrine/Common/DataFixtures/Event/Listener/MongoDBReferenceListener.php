@@ -14,7 +14,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
  * This software consists of voluntary contributions made by many individuals
- * and is licensed under the LGPL. For more information, see
+ * and is licensed under the MIT license. For more information, see
  * <http://www.doctrine-project.org>.
  */
 
@@ -65,11 +65,15 @@ final class MongoDBReferenceListener implements EventSubscriber
     public function postPersist(LifecycleEventArgs $args)
     {
         $object = $args->getDocument();
-        if (($name = $this->referenceRepository->getReferenceName($object)) !== false) {
-            $identity = $args->getDocumentManager()
-                ->getUnitOfWork()
-                ->getDocumentIdentifier($object);
-            $this->referenceRepository->setReferenceIdentity($name, $identity);
+
+        if (($names = $this->referenceRepository->getReferenceNames($object)) !== false) {
+            foreach ($names as $name) {
+                $identity = $args->getDocumentManager()
+                    ->getUnitOfWork()
+                    ->getDocumentIdentifier($object);
+
+                $this->referenceRepository->setReferenceIdentity($name, $identity);
+            }
         }
     }
 }

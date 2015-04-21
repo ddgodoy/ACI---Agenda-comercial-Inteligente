@@ -69,7 +69,7 @@ class FrameworkExtension extends Extension
         }
 
         $container->setParameter('kernel.http_method_override', $config['http_method_override']);
-
+        $container->setParameter('kernel.trusted_hosts', $config['trusted_hosts']);
         $container->setParameter('kernel.trusted_proxies', $config['trusted_proxies']);
         $container->setParameter('kernel.default_locale', $config['default_locale']);
 
@@ -218,15 +218,15 @@ class FrameworkExtension extends Extension
 
         // Choose storage class based on the DSN
         $supported = array(
-            'sqlite'    => 'Symfony\Component\HttpKernel\Profiler\SqliteProfilerStorage',
-            'mysql'     => 'Symfony\Component\HttpKernel\Profiler\MysqlProfilerStorage',
-            'file'      => 'Symfony\Component\HttpKernel\Profiler\FileProfilerStorage',
-            'mongodb'   => 'Symfony\Component\HttpKernel\Profiler\MongoDbProfilerStorage',
-            'memcache'  => 'Symfony\Component\HttpKernel\Profiler\MemcacheProfilerStorage',
+            'sqlite' => 'Symfony\Component\HttpKernel\Profiler\SqliteProfilerStorage',
+            'mysql' => 'Symfony\Component\HttpKernel\Profiler\MysqlProfilerStorage',
+            'file' => 'Symfony\Component\HttpKernel\Profiler\FileProfilerStorage',
+            'mongodb' => 'Symfony\Component\HttpKernel\Profiler\MongoDbProfilerStorage',
+            'memcache' => 'Symfony\Component\HttpKernel\Profiler\MemcacheProfilerStorage',
             'memcached' => 'Symfony\Component\HttpKernel\Profiler\MemcachedProfilerStorage',
-            'redis'     => 'Symfony\Component\HttpKernel\Profiler\RedisProfilerStorage',
+            'redis' => 'Symfony\Component\HttpKernel\Profiler\RedisProfilerStorage',
         );
-        list($class, ) = explode(':', $config['dsn'], 2);
+        list($class) = explode(':', $config['dsn'], 2);
         if (!isset($supported[$class])) {
             throw new \LogicException(sprintf('Driver "%s" is not supported for the profiler.', $class));
         }
@@ -316,7 +316,7 @@ class FrameworkExtension extends Extension
         $container->setParameter('session.storage.options', $options);
 
         // session handler (the internal callback registered with PHP session management)
-        if (null == $config['handler_id']) {
+        if (null === $config['handler_id']) {
             // Set the handler class to be null
             $container->getDefinition('session.storage.native')->replaceArgument(1, null);
             $container->getDefinition('session.storage.php_bridge')->replaceArgument(0, null);
@@ -358,7 +358,9 @@ class FrameworkExtension extends Extension
 
         $links = array(
             'textmate' => 'txmt://open?url=file://%%f&line=%%l',
-            'macvim'   => 'mvim://open?url=file://%%f&line=%%l',
+            'macvim' => 'mvim://open?url=file://%%f&line=%%l',
+            'emacs' => 'emacs://open?url=file://%%f&line=%%l',
+            'sublime' => 'subl://open?url=file://%%f&line=%%l',
         );
 
         $container->setParameter('templating.helper.code.file_link_format', isset($links[$ide]) ? $links[$ide] : $ide);
@@ -389,7 +391,7 @@ class FrameworkExtension extends Extension
         // Apply request scope to assets helper if one or more packages are request-scoped
         $requireRequestScope = array_reduce(
             $namedPackages,
-            function($v, Reference $ref) use ($container) {
+            function ($v, Reference $ref) use ($container) {
                 return $v || 'request' === $container->getDefinition($ref)->getScope();
             },
             'request' === $defaultPackage->getScope()
@@ -400,7 +402,7 @@ class FrameworkExtension extends Extension
         }
 
         if (!empty($config['loaders'])) {
-            $loaders = array_map(function($loader) { return new Reference($loader); }, $config['loaders']);
+            $loaders = array_map(function ($loader) { return new Reference($loader); }, $config['loaders']);
 
             // Use a delegation unless only a single loader was registered
             if (1 === count($loaders)) {
@@ -437,7 +439,7 @@ class FrameworkExtension extends Extension
         }
 
         $container->setParameter('templating.engines', $config['engines']);
-        $engines = array_map(function($engine) { return new Reference('templating.engine.'.$engine); }, $config['engines']);
+        $engines = array_map(function ($engine) { return new Reference('templating.engine.'.$engine); }, $config['engines']);
 
         // Use a delegation unless only a single engine was registered
         if (1 === count($engines)) {
@@ -532,10 +534,7 @@ class FrameworkExtension extends Extension
         // Use the "real" translator instead of the identity default
         $container->setAlias('translator', 'translator.default');
         $translator = $container->findDefinition('translator.default');
-        if (!is_array($config['fallback'])) {
-            $config['fallback'] = array($config['fallback']);
-        }
-        $translator->addMethodCall('setFallbackLocales', array($config['fallback']));
+        $translator->addMethodCall('setFallbackLocales', array($config['fallbacks']));
 
         // Discover translation directories
         $dirs = array();
@@ -627,9 +626,13 @@ class FrameworkExtension extends Extension
 
     private function getValidatorXmlMappingFiles(ContainerBuilder $container)
     {
-        $reflClass = new \ReflectionClass('Symfony\Component\Form\FormInterface');
-        $files = array(dirname($reflClass->getFileName()).'/Resources/config/validation.xml');
-        $container->addResource(new FileResource($files[0]));
+        $files = array();
+
+        if (interface_exists('Symfony\Component\Form\FormInterface')) {
+            $reflClass = new \ReflectionClass('Symfony\Component\Form\FormInterface');
+            $files[] = dirname($reflClass->getFileName()).'/Resources/config/validation.xml';
+            $container->addResource(new FileResource($files[0]));
+        }
 
         foreach ($container->getParameter('kernel.bundles') as $bundle) {
             $reflection = new \ReflectionClass($bundle);
@@ -657,13 +660,13 @@ class FrameworkExtension extends Extension
         return $files;
     }
 
-    private function registerAnnotationsConfiguration(array $config, ContainerBuilder $container,$loader)
+    private function registerAnnotationsConfiguration(array $config, ContainerBuilder $container, $loader)
     {
         $loader->load('annotations.xml');
 
         if ('file' === $config['cache']) {
             $cacheDir = $container->getParameterBag()->resolveValue($config['file_cache_dir']);
-            if (!is_dir($cacheDir) && false === @mkdir($cacheDir, 0777, true)) {
+            if (!is_dir($cacheDir) && false === @mkdir($cacheDir, 0777, true) && !is_dir($cacheDir)) {
                 throw new \RuntimeException(sprintf('Could not create cache directory "%s".', $cacheDir));
             }
 

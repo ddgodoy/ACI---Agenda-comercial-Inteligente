@@ -13,13 +13,11 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
  * This software consists of voluntary contributions made by many individuals
- * and is licensed under the LGPL. For more information, see
+ * and is licensed under the MIT license. For more information, see
  * <http://www.doctrine-project.org>.
  */
 
 namespace Doctrine\Tests\Common\DataFixtures\Executor;
-
-require_once __DIR__.'/../TestInit.php';
 
 use Doctrine\ORM\EntityManager;
 use Doctrine\Common\DataFixtures\Executor\ORMExecutor;
@@ -35,7 +33,7 @@ class ORMExecutorTest extends BaseTest
 {
     public function testExecuteWithNoPurge()
     {
-        $em = $this->getMockEntityManager();
+        $em = $this->getMockSqliteEntityManager();
         $purger = $this->getMockPurger();
         $purger->expects($this->once())
             ->method('setEntityManager')
@@ -50,7 +48,7 @@ class ORMExecutorTest extends BaseTest
 
     public function testExecuteWithPurge()
     {
-        $em = $this->getMockEntityManager();
+        $em = $this->getMockSqliteEntityManager();
         $purger = $this->getMockPurger();
         $purger->expects($this->once())
             ->method('purge')
@@ -65,17 +63,12 @@ class ORMExecutorTest extends BaseTest
 
     public function testExecuteTransaction()
     {
-        $em = $this->getMockEntityManager();
+        $em = $this->getMockSqliteEntityManager();
         $executor = new ORMExecutor($em);
         $fixture = $this->getMockFixture($em);
         $executor->execute(array($fixture), true);
     }
 
-    public function testSharedFixtureExecution()
-    {
-        $em = $this->getMockEntityManager();
-    }
-    
     private function getMockFixture($em)
     {
         return $this->getMock('Doctrine\Common\DataFixtures\FixtureInterface');

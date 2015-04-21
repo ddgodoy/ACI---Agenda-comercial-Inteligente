@@ -12,10 +12,13 @@
 namespace Sensio\Bundle\GeneratorBundle\Command;
 
 use Symfony\Component\Console\Input\InputOption;
+use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Output\Output;
 use Symfony\Component\Console\Command\Command;
+use Symfony\Component\HttpKernel\Bundle\BundleInterface;
+use Sensio\Bundle\GeneratorBundle\Command\Helper\DialogHelper;
 use Sensio\Bundle\GeneratorBundle\Generator\DoctrineCrudGenerator;
 use Sensio\Bundle\GeneratorBundle\Generator\DoctrineFormGenerator;
 use Sensio\Bundle\GeneratorBundle\Manipulator\RoutingManipulator;
@@ -27,7 +30,6 @@ use Sensio\Bundle\GeneratorBundle\Manipulator\RoutingManipulator;
  */
 class GenerateDoctrineCrudCommand extends GenerateDoctrineCommand
 {
-    private $generator;
     private $formGenerator;
 
     /**
@@ -37,6 +39,7 @@ class GenerateDoctrineCrudCommand extends GenerateDoctrineCommand
     {
         $this
             ->setDefinition(array(
+                new InputArgument('entity', InputArgument::OPTIONAL, 'The entity class name to initialize (shortcut notation)'),
                 new InputOption('entity', '', InputOption::VALUE_REQUIRED, 'The entity class name to initialize (shortcut notation)'),
                 new InputOption('route-prefix', '', InputOption::VALUE_REQUIRED, 'The route prefix'),
                 new InputOption('with-write', '', InputOption::VALUE_NONE, 'Whether or not to generate create, new and delete actions'),
@@ -113,8 +116,12 @@ EOT
 
         // form
         if ($withWrite) {
-            $this->generateForm($bundle, $entity, $metadata);
-            $output->writeln('Generating the Form code: <info>OK</info>');
+            $output->write('Generating the Form code: ');
+            if ($this->generateForm($bundle, $entity, $metadata)) {
+                $output->writeln('<info>OK</info>');
+            } else {
+                $output->writeln('<warning>Already exists, skipping</warning>');
+            }
         }
 
         // routing
@@ -143,13 +150,13 @@ EOT
             '',
         ));
 
+        if ($input->hasArgument('entity') && $input->getArgument('entity') != '') {
+            $input->setOption('entity', $input->getArgument('entity'));
+        }
+
         $entity = $dialog->askAndValidate($output, $dialog->getQuestion('The Entity shortcut name', $input->getOption('entity')), array('Sensio\Bundle\GeneratorBundle\Command\Validators', 'validateEntityName'), false, $input->getOption('entity'));
         $input->setOption('entity', $entity);
         list($bundle, $entity) = $this->parseShortcutNotation($entity);
-
-        // Entity exists?
-        $entityClass = $this->getContainer()->get('doctrine')->getAliasNamespace($bundle).'\\'.$entity;
-        $metadata = $this->getEntityMetadata($entityClass);
 
         // write?
         $withWrite = $input->getOption('with-write') ?: false;
@@ -201,12 +208,14 @@ EOT
     {
         try {
             $this->getFormGenerator($bundle)->generate($bundle, $entity, $metadata[0]);
-        } catch (\RuntimeException $e ) {
-            // form already exists
+        } catch (\RuntimeException $e) {
+            return false;
         }
+
+        return true;
     }
 
-    protected function updateRouting($dialog, InputInterface $input, OutputInterface $output, $bundle, $format, $entity, $prefix)
+    protected function updateRouting(DialogHelper $dialog, InputInterface $input, OutputInterface $output, BundleInterface $bundle, $format, $entity, $prefix)
     {
         $auto = true;
         if ($input->isInteractive()) {

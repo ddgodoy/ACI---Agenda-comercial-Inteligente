@@ -24,7 +24,7 @@ use Symfony\Component\Yaml\Exception\ParseException;
  *
  * @api
  */
-class YamlFileLoader extends ArrayLoader implements LoaderInterface
+class YamlFileLoader extends ArrayLoader
 {
     private $yamlParser;
 
@@ -50,7 +50,7 @@ class YamlFileLoader extends ArrayLoader implements LoaderInterface
         try {
             $messages = $this->yamlParser->parse(file_get_contents($resource));
         } catch (ParseException $e) {
-            throw new InvalidResourceException('Error parsing YAML.', 0, $e);
+            throw new InvalidResourceException(sprintf('Error parsing YAML, invalid file "%s"', $resource), 0, $e);
         }
 
         // empty file
