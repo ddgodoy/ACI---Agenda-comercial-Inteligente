@@ -12,6 +12,8 @@ use Doctrine\ORM\Mapping\JoinTable;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Security\Core\User\AdvancedUserInterface;
 use Symfony\Component\Security\Core\Encoder\MessageDigestPasswordEncoder;
+use ACI\BackendBundle\Entity\Feast;
+use Doctrine\ORM\Mapping\OneToMany;
 
 /**
  * @ORM\Entity(repositoryClass="ACI\SafetyBundle\Repository\UserRepository")
@@ -35,6 +37,11 @@ class User implements AdvancedUserInterface, \Serializable {
      * @ORM\Column(type="string", length=100)
      */
     protected $name;
+
+    /**
+     * @ORM\Column(type="string", length=100, nullable=true)
+     */
+    protected $token_phone;
 
     /**
      * @Assert\Email()
@@ -75,7 +82,7 @@ class User implements AdvancedUserInterface, \Serializable {
     /**
      * @ORM\ManyToMany(targetEntity="Role")
      * @ORM\JoinTable(name="user_roles",
-     *     joinColumns={@ORM\JoinColumn(name="user_id", referencedColumnName="id")},
+     *     joinColumns={@ORM\JoinColumn(name="user_id", referencedColumnName="id", onDelete="CASCADE")},
      *     inverseJoinColumns={@ORM\JoinColumn(name="role_id", referencedColumnName="id")}
      * )
      */
@@ -83,8 +90,8 @@ class User implements AdvancedUserInterface, \Serializable {
 
     public function __construct() {
         $this->user_roles = new \Doctrine\Common\Collections\ArrayCollection();
-        $this->salt = base_convert(sha1(uniqid(mt_rand(), true)), 16, 36);
         $this->enabled = true;
+        $this->salt = base_convert(sha1(uniqid(mt_rand(), true)), 16, 36);
         $this->accountNonExpired = true;
         $this->accountNonLocked = true;
         $this->credentialsNonExpired = true;
@@ -93,7 +100,7 @@ class User implements AdvancedUserInterface, \Serializable {
     /**
      * Get id
      *
-     * @return integer 
+     * @return integer
      */
     public function getId() {
         return $this->id;
@@ -111,7 +118,7 @@ class User implements AdvancedUserInterface, \Serializable {
     /**
      * Get username
      *
-     * @return string 
+     * @return string
      */
     public function getUsername() {
         return $this->username;
@@ -129,7 +136,7 @@ class User implements AdvancedUserInterface, \Serializable {
     /**
      * Get name
      *
-     * @return string 
+     * @return string
      */
     public function getName() {
         return $this->name;
@@ -147,7 +154,7 @@ class User implements AdvancedUserInterface, \Serializable {
     /**
      * Get email
      *
-     * @return string 
+     * @return string
      */
     public function getEmail() {
         return $this->email;
@@ -165,7 +172,7 @@ class User implements AdvancedUserInterface, \Serializable {
     /**
      * Get accountNonExpired
      *
-     * @return boolean 
+     * @return boolean
      */
     public function getAccountNonExpired() {
         return $this->accountNonExpired;
@@ -183,7 +190,7 @@ class User implements AdvancedUserInterface, \Serializable {
     /**
      * Get credentialsNonExpired
      *
-     * @return boolean 
+     * @return boolean
      */
     public function getCredentialsNonExpired() {
         return $this->credentialsNonExpired;
@@ -201,28 +208,18 @@ class User implements AdvancedUserInterface, \Serializable {
     /**
      * Get accountNonLocked
      *
-     * @return boolean 
+     * @return boolean
      */
     public function getAccountNonLocked() {
         return $this->accountNonLocked;
     }
 
-    /**
-     * Set enabled
-     *
-     * @param boolean $enabled
-     */
-    public function setEnabled($enabled) {
-        $this->enabled = $enabled;
+    function getToken_phone() {
+        return $this->token_phone;
     }
 
-    /**
-     * Get enabled
-     *
-     * @return boolean 
-     */
-    public function getEnabled() {
-        return $this->enabled;
+    function setToken_phone($token_phone) {
+        $this->token_phone = $token_phone;
     }
 
     /**
@@ -244,7 +241,7 @@ class User implements AdvancedUserInterface, \Serializable {
     /**
      * Get password
      *
-     * @return string 
+     * @return string
      */
     public function getPassword() {
         return $this->password;
@@ -262,7 +259,7 @@ class User implements AdvancedUserInterface, \Serializable {
     /**
      * Get salt
      *
-     * @return string 
+     * @return string
      */
     public function getSalt() {
         return $this->salt;
@@ -272,7 +269,7 @@ class User implements AdvancedUserInterface, \Serializable {
      * {@inheritdoc}
      */
     function eraseCredentials() {
-        
+
     }
 
     /**
@@ -342,7 +339,7 @@ class User implements AdvancedUserInterface, \Serializable {
     /**
      * Get user_roles
      *
-     * @return Doctrine\Common\Collections\Collection 
+     * @return Doctrine\Common\Collections\Collection
      */
     public function getUserRoles() {
         return $this->user_roles;
@@ -352,7 +349,7 @@ class User implements AdvancedUserInterface, \Serializable {
         $this->user_roles = $user_roles;
     }
 
-//Para apptibasse    
+//Para apptibasse
     public function getClass() {
         return "SafetyBundle:User";
     }
@@ -369,17 +366,15 @@ class User implements AdvancedUserInterface, \Serializable {
         return "avatar.png";
     }
 
-
     /**
      * Add user_roles
      *
      * @param \ACI\SafetyBundle\Entity\Role $userRoles
      * @return User
      */
-    public function addUserRole(\ACI\SafetyBundle\Entity\Role $userRoles)
-    {
+    public function addUserRole(\ACI\SafetyBundle\Entity\Role $userRoles) {
         $this->user_roles[] = $userRoles;
-    
+
         return $this;
     }
 
@@ -388,19 +383,208 @@ class User implements AdvancedUserInterface, \Serializable {
      *
      * @param \ACI\SafetyBundle\Entity\Role $userRoles
      */
-    public function removeUserRole(\ACI\SafetyBundle\Entity\Role $userRoles)
-    {
+    public function removeUserRole(\ACI\SafetyBundle\Entity\Role $userRoles) {
         $this->user_roles->removeElement($userRoles);
     }
 
-    public function serialize()
-    {
-           return serialize($this->id);
+    public function serialize() {
+        return serialize($this->id);
     }
 
-    public function unserialize($data)
-    {
-           $this->id = unserialize($data);
-    }  
-  
+    public function unserialize($data) {
+        $this->id = unserialize($data);
+    }
+
+    /**
+     * Set token_phone
+     *
+     * @param string $tokenPhone
+     * @return User
+     */
+    public function setTokenPhone($tokenPhone) {
+        $this->token_phone = $tokenPhone;
+
+        return $this;
+    }
+
+    /**
+     * Get token_phone
+     *
+     * @return string
+     */
+    public function getTokenPhone() {
+        return $this->token_phone;
+    }
+
+    /**
+     * Set enabled
+     *
+     * @param boolean $enabled
+     * @return User
+     */
+    public function setEnabled($enabled) {
+        $this->enabled = $enabled;
+
+        return $this;
+    }
+
+    /**
+     * Get enabled
+     *
+     * @return boolean
+     */
+    public function getEnabled() {
+        return $this->enabled;
+    }
+
+    /**
+     * Add user_feasts
+     *
+     * @param \ACI\BackendBundle\Entity\Feast $userFeasts
+     * @return User
+     */
+    public function addUserFeast(\ACI\BackendBundle\Entity\Feast $userFeasts) {
+        $this->user_feasts[] = $userFeasts;
+
+        return $this;
+    }
+
+    /**
+     * Remove user_feasts
+     *
+     * @param \ACI\BackendBundle\Entity\Feast $userFeasts
+     */
+    public function removeUserFeast(\ACI\BackendBundle\Entity\Feast $userFeasts) {
+        $this->user_feasts->removeElement($userFeasts);
+    }
+
+    /**
+     * Get user_feasts
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getUserFeasts() {
+        return $this->user_feasts;
+    }
+
+    /**
+     * Add user_userdfeastdata
+     *
+     * @param \ACI\BackendBundle\Entity\UserFeastData $userUserdfeastdata
+     * @return User
+     */
+    public function addUserUserdfeastdatum(\ACI\BackendBundle\Entity\UserFeastData $userUserdfeastdata) {
+        $this->user_userdfeastdata[] = $userUserdfeastdata;
+
+        return $this;
+    }
+
+    /**
+     * Remove user_userdfeastdata
+     *
+     * @param \ACI\BackendBundle\Entity\UserFeastData $userUserdfeastdata
+     */
+    public function removeUserUserdfeastdatum(\ACI\BackendBundle\Entity\UserFeastData $userUserdfeastdata) {
+        $this->user_userdfeastdata->removeElement($userUserdfeastdata);
+    }
+
+    /**
+     * Get user_userdfeastdata
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getUserUserdfeastdata() {
+        return $this->user_userdfeastdata;
+    }
+
+    /**
+     * Add user_artistfavorites
+     *
+     * @param \ACI\BackendBundle\Entity\ArtistFavorites $userArtistfavorites
+     * @return User
+     */
+    public function addUserArtistfavorite(\ACI\BackendBundle\Entity\ArtistFavorites $userArtistfavorites) {
+        $this->user_artistfavorites[] = $userArtistfavorites;
+
+        return $this;
+    }
+
+    /**
+     * Remove user_artistfavorites
+     *
+     * @param \ACI\BackendBundle\Entity\ArtistFavorites $userArtistfavorites
+     */
+    public function removeUserArtistfavorite(\ACI\BackendBundle\Entity\ArtistFavorites $userArtistfavorites) {
+        $this->user_artistfavorites->removeElement($userArtistfavorites);
+    }
+
+    /**
+     * Get user_artistfavorites
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getUserArtistfavorites() {
+        return $this->user_artistfavorites;
+    }
+
+    /**
+     * Add user_global
+     *
+     * @param \ACI\BackendBundle\Entity\UserFavorites $userGlobal
+     * @return User
+     */
+    public function addUserGlobal(\ACI\BackendBundle\Entity\UserFavorites $userGlobal) {
+        $this->user_global[] = $userGlobal;
+
+        return $this;
+    }
+
+    /**
+     * Remove user_global
+     *
+     * @param \ACI\BackendBundle\Entity\UserFavorites $userGlobal
+     */
+    public function removeUserGlobal(\ACI\BackendBundle\Entity\UserFavorites $userGlobal) {
+        $this->user_global->removeElement($userGlobal);
+    }
+
+    /**
+     * Get user_global
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getUserGlobal() {
+        return $this->user_global;
+    }
+
+    /**
+     * Add user_favorite
+     *
+     * @param \ACI\BackendBundle\Entity\UserFavorites $userFavorite
+     * @return User
+     */
+    public function addUserFavorite(\ACI\BackendBundle\Entity\UserFavorites $userFavorite) {
+        $this->user_favorite[] = $userFavorite;
+
+        return $this;
+    }
+
+    /**
+     * Remove user_favorite
+     *
+     * @param \ACI\BackendBundle\Entity\UserFavorites $userFavorite
+     */
+    public function removeUserFavorite(\ACI\BackendBundle\Entity\UserFavorites $userFavorite) {
+        $this->user_favorite->removeElement($userFavorite);
+    }
+
+    /**
+     * Get user_favorite
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getUserFavorite() {
+        return $this->user_favorite;
+    }
+
 }

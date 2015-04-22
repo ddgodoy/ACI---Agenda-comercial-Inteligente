@@ -23,25 +23,25 @@ class Industry {
 
     /**
      * @var string $name
-     * @ORM\Column(name="name", type="string", length=255, nullable=false)
+     * @ORM\Column(name="name", type="string", length=512, nullable=false)
      */
     private $name;
 
     /**
      * @var string $sic
-     * @ORM\Column(name="sic", type="string", length=50, nullable=false)
+     * @ORM\Column(name="sic", type="string", length=255, nullable=false)
      */
     private $sic;
 
     /**
      * @var string $naics
-     * @ORM\Column(name="naics", type="string", length=50, nullable=false)
+     * @ORM\Column(name="naics", type="string", length=255, nullable=true)
      */
     private $naics;
 
     /**
      * @var string $naics_clasification
-     * @ORM\Column(name="naics_clasification", type="string", length=50, nullable=false)
+     * @ORM\Column(name="naics_clasification", type="string", length=512, nullable=true)
      */
     private $naics_clasification;
 
@@ -79,27 +79,24 @@ class Industry {
         return $this->name;
     }
 
-
     /**
      * Set sic
      *
      * @param string $sic
      * @return Industry
      */
-    public function setSic($sic)
-    {
+    public function setSic($sic) {
         $this->sic = $sic;
-    
+
         return $this;
     }
 
     /**
      * Get sic
      *
-     * @return string 
+     * @return string
      */
-    public function getSic()
-    {
+    public function getSic() {
         return $this->sic;
     }
 
@@ -109,20 +106,18 @@ class Industry {
      * @param string $naics
      * @return Industry
      */
-    public function setNaics($naics)
-    {
+    public function setNaics($naics) {
         $this->naics = $naics;
-    
+
         return $this;
     }
 
     /**
      * Get naics
      *
-     * @return string 
+     * @return string
      */
-    public function getNaics()
-    {
+    public function getNaics() {
         return $this->naics;
     }
 
@@ -132,20 +127,19 @@ class Industry {
      * @param string $naicsClasification
      * @return Industry
      */
-    public function setNaicsClasification($naicsClasification)
-    {
+    public function setNaicsClasification($naicsClasification) {
         $this->naics_clasification = $naicsClasification;
-    
+
         return $this;
     }
 
     /**
      * Get naics_clasification
      *
-     * @return string 
+     * @return string
      */
-    public function getNaicsClasification()
-    {
+    public function getNaicsClasification() {
         return $this->naics_clasification;
     }
+
 }

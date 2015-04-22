@@ -21,7 +21,11 @@
     "require-dev": {
         "symfony/phpunit-bridge": "~2.7",
         "symfony/yaml": "~2.1",
-        "symfony/config": "~2.2"
+        "symfony/config": "~2.2",
+        "symfony/expression-language": "~2.6"
+    },
+    "conflict": {
+        "symfony/expression-language": "<2.6"
     },
     "suggest": {
         "symfony/yaml": "",
@@ -35,7 +39,7 @@
     "minimum-stability": "dev",
     "extra": {
         "branch-alias": {
-            "dev-master": "2.3-dev"
+            "dev-master": "2.6-dev"
         }
     }
 }

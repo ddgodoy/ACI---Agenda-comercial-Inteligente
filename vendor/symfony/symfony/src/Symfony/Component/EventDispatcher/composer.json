@@ -20,7 +20,11 @@
     },
     "require-dev": {
         "symfony/phpunit-bridge": "~2.7",
-        "symfony/dependency-injection": "~2.0,>=2.0.5"
+        "symfony/dependency-injection": "~2.6",
+        "symfony/expression-language": "~2.6",
+        "symfony/config": "~2.0,>=2.0.5",
+        "symfony/stopwatch": "~2.3",
+        "psr/log": "~1.0"
     },
     "suggest": {
         "symfony/dependency-injection": "",
@@ -33,7 +37,7 @@
     "minimum-stability": "dev",
     "extra": {
         "branch-alias": {
-            "dev-master": "2.3-dev"
+            "dev-master": "2.6-dev"
         }
     }
 }

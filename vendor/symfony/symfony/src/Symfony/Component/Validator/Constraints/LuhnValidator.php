@@ -39,6 +39,10 @@ class LuhnValidator extends ConstraintValidator
      */
     public function validate($value, Constraint $constraint)
     {
+        if (!$constraint instanceof Luhn) {
+            throw new UnexpectedTypeException($constraint, __NAMESPACE__.'\Luhn');
+        }
+
         if (null === $value || '' === $value) {
             return;
         }
@@ -52,9 +56,10 @@ class LuhnValidator extends ConstraintValidator
         $value = (string) $value;
 
         if (!ctype_digit($value)) {
-            $this->context->addViolation($constraint->message, array(
-                '{{ value }}' => $this->formatValue($value),
-            ));
+            $this->buildViolation($constraint->message)
+                ->setParameter('{{ value }}', $this->formatValue($value))
+                ->setCode(Luhn::INVALID_CHARACTERS_ERROR)
+                ->addViolation();
 
             return;
         }
@@ -82,9 +87,10 @@ class LuhnValidator extends ConstraintValidator
         }
 
         if (0 === $checkSum || 0 !== $checkSum % 10) {
-            $this->context->addViolation($constraint->message, array(
-                '{{ value }}' => $this->formatValue($value),
-            ));
+            $this->buildViolation($constraint->message)
+                ->setParameter('{{ value }}', $this->formatValue($value))
+                ->setCode(Luhn::CHECKSUM_FAILED_ERROR)
+                ->addViolation();
         }
     }
 }

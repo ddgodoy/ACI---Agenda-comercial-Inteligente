@@ -3,6 +3,7 @@
 namespace Symfony\Bundle\SecurityBundle\Tests\DataCollector;
 
 use Symfony\Bundle\SecurityBundle\DataCollector\SecurityDataCollector;
+use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorage;
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 use Symfony\Component\Security\Core\Role\Role;
 
@@ -21,12 +22,10 @@ class SecurityDataCollectorTest extends \PHPUnit_Framework_TestCase
         $this->assertEmpty($collector->getUser());
     }
 
-    public function testCollectWhenAuthenticationTokenIsNull()
+    /** @dataProvider provideTokenStorage */
+    public function testCollectWhenAuthenticationTokenIsNull($tokenStorage)
     {
-        $securityContext = $this->getMock('Symfony\Component\Security\Core\SecurityContextInterface');
-        $securityContext->expects($this->once())->method('getToken')->willReturn(null);
-
-        $collector = new SecurityDataCollector($securityContext);
+        $collector = new SecurityDataCollector($tokenStorage);
         $collector->collect($this->getRequest(), $this->getResponse());
 
         $this->assertTrue($collector->isEnabled());
@@ -36,16 +35,21 @@ class SecurityDataCollectorTest extends \PHPUnit_Framework_TestCase
         $this->assertEmpty($collector->getUser());
     }
 
+    public function provideTokenStorage()
+    {
+        return array(
+            array(new TokenStorage()),
+            array($this->getMock('Symfony\Component\Security\Core\SecurityContextInterface')),
+        );
+    }
+
     /** @dataProvider provideRoles */
     public function testCollectAuthenticationTokenAndRoles(array $roles, array $normalizedRoles)
     {
-        $securityContext = $this->getMock('Symfony\Component\Security\Core\SecurityContextInterface');
-        $securityContext
-            ->expects($this->once())
-            ->method('getToken')
-            ->willReturn(new UsernamePasswordToken('hhamon', 'P4$$w0rD', 'provider', $roles));
+        $tokenStorage = new TokenStorage();
+        $tokenStorage->setToken(new UsernamePasswordToken('hhamon', 'P4$$w0rD', 'provider', $roles));
 
-        $collector = new SecurityDataCollector($securityContext);
+        $collector = new SecurityDataCollector($tokenStorage);
         $collector->collect($this->getRequest(), $this->getResponse());
 
         $this->assertTrue($collector->isEnabled());

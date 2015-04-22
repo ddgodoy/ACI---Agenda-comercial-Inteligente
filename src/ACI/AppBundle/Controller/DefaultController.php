@@ -39,8 +39,8 @@ class DefaultController extends Controller {
     public function registerAction() {
         $request = $this->getRequest();
         $plan = $request->get('plan', '25139');
-        $entity = new \ACI\SafetyBundle\Entity\User();
-        $form = $this->createForm(new \ACI\SafetyBundle\Form\UserType(), $entity);
+        $entity = new ACI\SafetyBundle\Entity\User();
+        $form = $this->createForm(new ACI\SafetyBundle\Form\UserType(), $entity);
 
         return $this->render('AppBundle:Backend:register.html.twig', array(
                     'form' => $form->createView(),
@@ -110,11 +110,11 @@ class DefaultController extends Controller {
      * @Route("/user_add", name="user_create")
      */
     public function createAction(\Symfony\Component\HttpFoundation\Request $request) {
-        $entity = new \ACI\SafetyBundle\Entity\User();
+        $entity = new ACI\SafetyBundle\Entity\User();
 
         $plan = $request->get('plan');
 
-        $form = $this->createForm(new \ACI\SafetyBundle\Form\UserType(), $entity);
+        $form = $this->createForm(new ACI\SafetyBundle\Form\UserType(), $entity);
         $form->bind($request);
         $em = $this->getDoctrine()->getManager();
 
@@ -122,7 +122,7 @@ class DefaultController extends Controller {
             $entity->setEnabled(true);
             $role = $em->getRepository("SafetyBundle:Role")->findOneByName("ROLE_CMS");
             if (!$role) {
-                $role = new \ACI\SafetyBundle\Entity\Role();
+                $role = new ACI\SafetyBundle\Entity\Role();
                 $role->setDescription("User CMS");
                 $role->setName("ROLE_CMS");
                 $em->persist($role);
@@ -164,25 +164,6 @@ class DefaultController extends Controller {
         return array();
     }
 
-    /**
-     * Displays a form to create a new Customer entity.
-     *
-     * @Route("/forgotpasswd", name="_user_forgotpasswd")
-     * @Template()
-     */
-    public function forgotpasswdAction() {
-        $entity = new \ACI\EcomerceBundle\Entity\Customer();
-        $form = $this->createForm(new \ACI\EcomerceBundle\Form\ForgotType(), $entity);
-
-        $theme = $this->get('apptibase.cms')->getTheme();
-        return $this->render($theme . "Bundle:templates:forgotpasswd.html.twig", array(
-                    'entity' => $entity,
-                    'form' => $form->createView(),
-                    'theme' => $theme,
-                    'error' => ""
-        ));
-    }
-
     // codificar el passwd
     private function setSecurePassword(&$entity) {
         $confg = Yaml::parse(__DIR__ . '/../../../../app/config/security.yml');
@@ -199,121 +180,6 @@ class DefaultController extends Controller {
         $encoder = new MessageDigestPasswordEncoder($params['algorithm'], $params['encode_as_base64'], $params['iterations']);
         $password = $encoder->encodePassword($entity->getPasswordForgot(), $entity->getSalt());
         $entity->setPassword($password);
-    }
-
-    /**
-     * Crea una nueva customer
-     *
-     * @Route("/send_newpass", name="send_newpass")
-     */
-    public function send_newpassAction(\Symfony\Component\HttpFoundation\Request $request) {
-
-        $request = $this->getRequest();
-        $email = $request->get('email');
-        $em = $this->getDoctrine()->getManager();
-        $repo_customer = $em->getRepository("EcomerceBundle:Customer");
-        $customer = $repo_customer->findByEmail($email);
-        $theme = $this->get('apptibase.cms')->getTheme();
-        $entity = new \ACI\EcomerceBundle\Entity\Customer();
-        $form = $this->createForm(new \ACI\EcomerceBundle\Form\ForgotType(), $entity);
-        if ($customer) {
-
-            $cadenahash = $this->get('apptibase.cms')->RandomString();
-            $subject = "Cambio de contraseña";
-            $body = "Estimado usuario: " . $email;
-            $body.="<br>";
-            $body.="Este correo es para hacerle llegar la nueva contrase&ntilde;a para que pueda entrar a nuestro sitio";
-            $body.="<br>";
-            $body.="<br>";
-            $body.="Datos de la nueva contrase&ntilde;a generada: " . $cadenahash;
-            $body.="<br>";
-            $body.="Por favor, entre el siguiente enlace para su activaci&oacute;n: " . '<a href="http://www.apptibase.com/reactivar/email/' . $email . '">Activar</a>';
-            $body.="<br>";
-            $body.="Cualquier duda al respecto no deje de contactarnos mediante el apartado " . '<a href="http://www.apptibase.com/cms/contacto">Contacto GFD</a>';
-            $body.="<br>";
-            $body.="<br>";
-            $body.="CONTACTO";
-            $body.="<br>";
-            $body.="jplanas@globalfooddivision.com,contacto@globalfooddivision.com";
-            $body.="<br>";
-            $body.="Tel. (55) 3095 8888 Ext. 118";
-            $body.="<br>";
-            $body.="<br>";
-            $body.="DIRECCI&Oacute;N";
-            $body.="<br>";
-            $body.="Prolongaci&oacute;n Calle 18 No. 218 Col. San Pedro de los Pinos Del. &Aacute;lvaro Obreg&oacute;n M&eacute;xico D.F, C.P 01180 ";
-            $body.="<br>";
-
-            $remitente = 'no-reply@www.apptibase.com';
-            $destino = $email;
-            $mensaje = $body;
-            $encabezados = "From: $remitente\nReply-To: $remitente\nContent-Type: text/html; charset=iso-8859-1";
-
-            try {
-                $customer->setPasswordForgot($cadenahash);
-                $em->persist($customer);
-                $em->flush();
-                mail($destino, $subject, $mensaje, $encabezados) or die("No se ha podido enviar tu mensaje. Ha ocurrido un error");
-
-                return $this->render($theme . "Bundle:templates:forgotsuccess.html.twig");
-            } catch (\Exception $exc) {
-                return $this->render($theme . "Bundle:templates:forgotpasswd.html.twig", array(
-                            'error' => "Ha ocurrido un error, detalle: " . $exc->getMessage()
-                ));
-            }
-        } else {
-            return $this->render($theme . "Bundle:templates:forgotpasswd.html.twig", array(
-                        'entity' => $entity,
-                        'form' => $form->createView(),
-                        'theme' => $theme,
-                        'error' => "El email introducido no se encuentra registrado en la tienda."
-            ));
-        }
-    }
-
-    /**
-     * Crea una nueva customer
-     *
-     * @Route("/reactivar/email/{email}", name="reactivar")
-     */
-    public function reactivarAction($email) {
-        if (isset($email)) {
-            $em = $this->getDoctrine()->getManager();
-            $repo_customer = $em->getRepository("EcomerceBundle:Customer");
-            $customer = $repo_customer->findByEmail($email);
-            $theme = $this->get('apptibase.cms')->getTheme();
-            $form = $this->createForm(new \ACI\EcomerceBundle\Form\RegisterType(), $customer);
-            if ($customer) {
-
-                try {
-                    $this->setSecurePasswordForgot($customer);
-                    $em->persist($customer);
-                    $em->flush();
-                    $token = new \Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken($customer, $customer->getPassword(), 'usuarios', $customer->getRoles());
-                    $this->container->get('security.context')->setToken($token);
-
-
-                    return $this->render($theme . "Bundle:templates:profile.html.twig", array(
-                                'entity' => $customer,
-                                'form' => $form->createView(),
-                                'theme' => $theme
-                    ));
-                } catch (\Exception $exc) {
-                    return $this->render($theme . "Bundle:templates:forgotpasswd.html.twig", array(
-                                'error' => "Ha ocurrido un error, detalle: " . $exc->getMessage()
-                    ));
-                }
-            } else {
-                return $this->render($theme . "Bundle:templates:forgotpasswd.html.twig", array(
-                            'entity' => $entity,
-                            'form' => $form->createView(),
-                            'theme' => $theme,
-                            'error' => "Vuelva a realizar el proceso por favor."
-                ));
-            }
-        } else {
-            return $this->redirect($this->generateUrl('index'));
-        }
     }
 
 }

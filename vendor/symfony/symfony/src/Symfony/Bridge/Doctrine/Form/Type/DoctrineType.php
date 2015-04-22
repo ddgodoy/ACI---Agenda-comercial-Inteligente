@@ -116,7 +116,7 @@ abstract class DoctrineType extends AbstractType
                 ? spl_object_hash($options['group_by'])
                 : $options['group_by'];
 
-            $hash = md5(json_encode(array(
+            $hash = hash('sha256', json_encode(array(
                 spl_object_hash($options['em']),
                 $options['class'],
                 $propertyHash,
@@ -145,6 +145,10 @@ abstract class DoctrineType extends AbstractType
         $emNormalizer = function (Options $options, $em) use ($registry) {
             /* @var ManagerRegistry $registry */
             if (null !== $em) {
+                if ($em instanceof ObjectManager) {
+                    return $em;
+                }
+
                 return $registry->getManager($em);
             }
 
@@ -178,6 +182,7 @@ abstract class DoctrineType extends AbstractType
         ));
 
         $resolver->setAllowedTypes(array(
+            'em' => array('null', 'string', 'Doctrine\Common\Persistence\ObjectManager'),
             'loader' => array('null', 'Symfony\Bridge\Doctrine\Form\ChoiceList\EntityLoaderInterface'),
         ));
     }

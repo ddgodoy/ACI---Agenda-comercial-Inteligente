@@ -25,6 +25,10 @@ class LengthValidator extends ConstraintValidator
      */
     public function validate($value, Constraint $constraint)
     {
+        if (!$constraint instanceof Length) {
+            throw new UnexpectedTypeException($constraint, __NAMESPACE__.'\Length');
+        }
+
         if (null === $value || '' === $value) {
             return;
         }
@@ -60,37 +64,35 @@ class LengthValidator extends ConstraintValidator
         }
 
         if ($invalidCharset) {
-            $this->context->addViolation($constraint->charsetMessage, array(
-                '{{ value }}' => $this->formatValue($stringValue),
-                '{{ charset }}' => $constraint->charset,
-            ), $value);
-
-            return;
-        }
-
-        if ($constraint->min == $constraint->max && $length != $constraint->min) {
-            $this->context->addViolation($constraint->exactMessage, array(
-                '{{ value }}' => $this->formatValue($stringValue),
-                '{{ limit }}' => $constraint->min,
-            ), $value, (int) $constraint->min);
+            $this->buildViolation($constraint->charsetMessage)
+                ->setParameter('{{ value }}', $this->formatValue($stringValue))
+                ->setParameter('{{ charset }}', $constraint->charset)
+                ->setInvalidValue($value)
+                ->addViolation();
 
             return;
         }
 
         if (null !== $constraint->max && $length > $constraint->max) {
-            $this->context->addViolation($constraint->maxMessage, array(
-                '{{ value }}' => $this->formatValue($stringValue),
-                '{{ limit }}' => $constraint->max,
-            ), $value, (int) $constraint->max);
+            $this->buildViolation($constraint->min == $constraint->max ? $constraint->exactMessage : $constraint->maxMessage)
+                ->setParameter('{{ value }}', $this->formatValue($stringValue))
+                ->setParameter('{{ limit }}', $constraint->max)
+                ->setInvalidValue($value)
+                ->setPlural((int) $constraint->max)
+                ->setCode(Length::TOO_LONG_ERROR)
+                ->addViolation();
 
             return;
         }
 
         if (null !== $constraint->min && $length < $constraint->min) {
-            $this->context->addViolation($constraint->minMessage, array(
-                '{{ value }}' => $this->formatValue($stringValue),
-                '{{ limit }}' => $constraint->min,
-            ), $value, (int) $constraint->min);
+            $this->buildViolation($constraint->min == $constraint->max ? $constraint->exactMessage : $constraint->minMessage)
+                ->setParameter('{{ value }}', $this->formatValue($stringValue))
+                ->setParameter('{{ limit }}', $constraint->min)
+                ->setInvalidValue($value)
+                ->setPlural((int) $constraint->min)
+                ->setCode(Length::TOO_SHORT_ERROR)
+                ->addViolation();
         }
     }
 }

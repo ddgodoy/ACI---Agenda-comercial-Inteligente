@@ -18,12 +18,15 @@ class Item implements \Persistent
     private $groupName;
     private $price;
 
-    public function __construct($id = null, $value = null, $groupName = null, $price = null)
+    private $slug;
+
+    public function __construct($id = null, $value = null, $groupName = null, $price = null, $slug = null)
     {
         $this->id = $id;
         $this->value = $value;
         $this->groupName = $groupName;
         $this->price = $price;
+        $this->slug = $slug;
     }
 
     public function getId()
@@ -49,6 +52,11 @@ class Item implements \Persistent
     public function getPrice()
     {
         return $this->price;
+    }
+
+    public function getSlug()
+    {
+        return $this->slug;
     }
 
     public function getPrimaryKey()

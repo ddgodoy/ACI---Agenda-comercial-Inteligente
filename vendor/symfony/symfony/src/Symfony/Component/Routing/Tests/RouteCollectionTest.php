@@ -245,6 +245,20 @@ class RouteCollectionTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals('{locale}.example.com', $routeb->getHost());
     }
 
+    public function testSetCondition()
+    {
+        $collection = new RouteCollection();
+        $routea = new Route('/a');
+        $routeb = new Route('/b', array(), array(), array(), '{locale}.example.net', array(), array(), 'context.getMethod() == "GET"');
+        $collection->add('a', $routea);
+        $collection->add('b', $routeb);
+
+        $collection->setCondition('context.getMethod() == "POST"');
+
+        $this->assertEquals('context.getMethod() == "POST"', $routea->getCondition());
+        $this->assertEquals('context.getMethod() == "POST"', $routeb->getCondition());
+    }
+
     public function testClone()
     {
         $collection = new RouteCollection();

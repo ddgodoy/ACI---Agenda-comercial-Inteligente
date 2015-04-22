@@ -12,4 +12,11 @@ use Doctrine\ORM\EntityRepository;
  */
 class CountryRepository extends EntityRepository {
 
+    public function findCountry($name) {
+        $dql = 'SELECT c FROM ACI\BackendBundle\Entity\Country c WHERE c.name= ' . '"' . $name . '"' . "'";
+        $em = $this->getEntityManager();
+        $query = $em->createQuery($dql);
+        return $query->getOneOrNullResult();
+    }
+
 }

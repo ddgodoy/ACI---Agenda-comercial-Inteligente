@@ -123,7 +123,7 @@ class PropertyPath implements \IteratorAggregate, PropertyPathInterface
 
             $position += strlen($matches[1]);
             $remaining = $matches[4];
-            $pattern = '/^(\.(\w+)|\[([^\]]+)\])(.*)/';
+            $pattern = '/^(\.([^\.|\[]+)|\[([^\]]+)\])(.*)/';
         }
 
         if ('' !== $remaining) {

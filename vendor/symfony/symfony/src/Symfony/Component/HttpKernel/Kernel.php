@@ -48,23 +48,23 @@ abstract class Kernel implements KernelInterface, TerminableInterface
     /**
      * @var BundleInterface[]
      */
-    protected $bundles;
+    protected $bundles = array();
 
     protected $bundleMap;
     protected $container;
     protected $rootDir;
     protected $environment;
     protected $debug;
-    protected $booted;
+    protected $booted = false;
     protected $name;
     protected $startTime;
     protected $loadClassCache;
 
-    const VERSION = '2.3.27';
-    const VERSION_ID = '20327';
+    const VERSION = '2.6.6';
+    const VERSION_ID = '20606';
     const MAJOR_VERSION = '2';
-    const MINOR_VERSION = '3';
-    const RELEASE_VERSION = '27';
+    const MINOR_VERSION = '6';
+    const RELEASE_VERSION = '6';
     const EXTRA_VERSION = '';
 
     /**
@@ -79,10 +79,8 @@ abstract class Kernel implements KernelInterface, TerminableInterface
     {
         $this->environment = $environment;
         $this->debug = (bool) $debug;
-        $this->booted = false;
         $this->rootDir = $this->getRootDir();
         $this->name = $this->getName();
-        $this->bundles = array();
 
         if ($this->debug) {
             $this->startTime = microtime(true);
@@ -212,6 +210,8 @@ abstract class Kernel implements KernelInterface, TerminableInterface
      * {@inheritdoc}
      *
      * @api
+     *
+     * @deprecated Deprecated since version 2.6, to be removed in 3.0.
      */
     public function isClassInActiveBundle($class)
     {

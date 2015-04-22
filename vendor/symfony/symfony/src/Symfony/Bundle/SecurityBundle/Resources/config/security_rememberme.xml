@@ -24,6 +24,7 @@
             <argument type="service" id="security.authentication.manager" />
             <argument type="service" id="logger" on-invalid="null" />
             <argument type="service" id="event_dispatcher" on-invalid="null"/>
+            <argument /> <!-- Catch exception flag set in RememberMeFactory -->
         </service>
 
         <service id="security.authentication.provider.rememberme" class="%security.authentication.provider.rememberme.class%" abstract="true" public="false">

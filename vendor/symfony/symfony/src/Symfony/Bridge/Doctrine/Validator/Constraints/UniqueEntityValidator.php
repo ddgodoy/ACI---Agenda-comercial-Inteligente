@@ -43,6 +43,10 @@ class UniqueEntityValidator extends ConstraintValidator
      */
     public function validate($entity, Constraint $constraint)
     {
+        if (!$constraint instanceof UniqueEntity) {
+            throw new UnexpectedTypeException($constraint, __NAMESPACE__.'\UniqueEntity');
+        }
+
         if (!is_array($constraint->fields) && !is_string($constraint->fields)) {
             throw new UnexpectedTypeException($constraint->fields, 'array');
         }
@@ -130,6 +134,9 @@ class UniqueEntityValidator extends ConstraintValidator
         $errorPath = null !== $constraint->errorPath ? $constraint->errorPath : $fields[0];
         $invalidValue = isset($criteria[$errorPath]) ? $criteria[$errorPath] : $criteria[$fields[0]];
 
-        $this->context->addViolationAt($errorPath, $constraint->message, array(), $invalidValue);
+        $this->buildViolation($constraint->message)
+            ->atPath($errorPath)
+            ->setInvalidValue($invalidValue)
+            ->addViolation();
     }
 }

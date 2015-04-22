@@ -11,20 +11,16 @@
 
 namespace Symfony\Bridge\Propel1\Tests\Fixtures;
 
-class Column
+class Column extends \ColumnMap
 {
     private $name;
-    private $type;
+    protected $type;
 
     public function __construct($name, $type)
     {
         $this->name = $name;
         $this->type = $type;
-    }
-
-    public function getType()
-    {
-        return $this->type;
+        $this->phpName = ucfirst($name);
     }
 
     public function isText()

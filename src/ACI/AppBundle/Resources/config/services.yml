@@ -1,16 +1,4 @@
-services: 
-    apptibase.cms:
-      arguments: ['@doctrine']
-      class: ACI\AppBundle\Services\CmsService
-    site_manager:
-        class: ACI\AppBundle\Domain\SiteManager
-    current_site_listener:
-        class: ACI\AppBundle\EventListener\SubdomainListener
-        arguments:
-            - "@site_manager"
-            - "@doctrine"
-        tags:
-            -
-                name: kernel.event_listener
-                method: onKernelRequest
-                event: kernel.request    
+services:
+#    app.example:
+#        class: ACI\AppBundle\Example
+#        arguments: [@service_id, "plain_value", %parameter%]
