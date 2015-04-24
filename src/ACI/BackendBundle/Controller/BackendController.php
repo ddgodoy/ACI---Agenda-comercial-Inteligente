@@ -135,4 +135,61 @@ class BackendController extends Controller {
         // Echo memory peak usage
     }
 
+    /**
+     * @Route("/importcompany", name="admin_importcompany")
+     * @Template()
+     */
+    public function importCompanyAction() {
+        $em = $this->getDoctrine()->getManager();
+        $file = $this->get('kernel')->getRootDir() . "/../data/cik_ticker.xlsx";
+        if (!file_exists($file)) {
+            exit("El archivo no existe.");
+        }
+        $objPHPExcel = PHPExcel_IOFactory::load($file);
+
+        foreach ($objPHPExcel->getWorksheetIterator() as $worksheet) {
+            $columnA = 'A';
+            $columnB = 'B';
+            $columnC = 'C';
+            $columnD = 'D';
+            $columnE = 'E';
+            $columnH = 'H';
+            $counter = 0;
+            $lastRow = $worksheet->getHighestRow();
+            for ($row = 2; $row <= $lastRow; $row++) {
+                $cellA = $worksheet->getCell($columnA . $row);
+                $cellB = $worksheet->getCell($columnB . $row);
+                $cellC = $worksheet->getCell($columnC . $row);
+                $cellD = $worksheet->getCell($columnD . $row);
+                $cellE = $worksheet->getCell($columnE . $row);
+                $cellH = $worksheet->getCell($columnH . $row);
+
+                $company = new \ACI\BackendBundle\Entity\Company();
+
+                $company->setCik($cellA->getValue());
+                $company->setName($cellC->getValue());
+                $company->setTicker($cellB->getValue());
+                $company->setSic($cellE->getValue());
+                $company->setIrsNumber($cellH->getValue());
+                $company->setExchange($cellD->getValue());
+
+
+
+                $em->persist($company);
+                $counter++;
+            }
+
+            try {
+                $em->flush();
+                echo "Se procesaron " . $counter . " industrias.";
+                return new \Symfony\Component\HttpFoundation\Response("!Listo");
+            } catch (Exception $exc) {
+                echo $exc->getTraceAsString();
+            }
+        }
+
+
+        // Echo memory peak usage
+    }
+
 }

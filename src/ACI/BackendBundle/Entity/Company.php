@@ -41,15 +41,21 @@ class Company {
 
     /**
      * @var string $irs_number
-     * @ORM\Column(name="irs_number", type="string", length=50, nullable=false)
+     * @ORM\Column(name="irs_number", type="string", length=50, nullable=true)
      */
     private $irs_number;
 
     /**
      * @var string $sic
-     * @ORM\Column(name="sic", type="string", length=50, nullable=false)
+     * @ORM\Column(name="sic", type="string", length=50, nullable=true)
      */
     private $sic;
+
+    /**
+     * @var string $exchange
+     * @ORM\Column(name="exchange", type="string", length=50, nullable=true)
+     */
+    private $exchange;
 
     public function __construct() {
 
@@ -85,27 +91,24 @@ class Company {
         return $this->name;
     }
 
-
     /**
      * Set cik
      *
      * @param string $cik
      * @return Company
      */
-    public function setCik($cik)
-    {
+    public function setCik($cik) {
         $this->cik = $cik;
-    
+
         return $this;
     }
 
     /**
      * Get cik
      *
-     * @return string 
+     * @return string
      */
-    public function getCik()
-    {
+    public function getCik() {
         return $this->cik;
     }
 
@@ -115,20 +118,18 @@ class Company {
      * @param string $ticker
      * @return Company
      */
-    public function setTicker($ticker)
-    {
+    public function setTicker($ticker) {
         $this->ticker = $ticker;
-    
+
         return $this;
     }
 
     /**
      * Get ticker
      *
-     * @return string 
+     * @return string
      */
-    public function getTicker()
-    {
+    public function getTicker() {
         return $this->ticker;
     }
 
@@ -138,20 +139,18 @@ class Company {
      * @param string $irsNumber
      * @return Company
      */
-    public function setIrsNumber($irsNumber)
-    {
+    public function setIrsNumber($irsNumber) {
         $this->irs_number = $irsNumber;
-    
+
         return $this;
     }
 
     /**
      * Get irs_number
      *
-     * @return string 
+     * @return string
      */
-    public function getIrsNumber()
-    {
+    public function getIrsNumber() {
         return $this->irs_number;
     }
 
@@ -161,20 +160,40 @@ class Company {
      * @param string $sic
      * @return Company
      */
-    public function setSic($sic)
-    {
+    public function setSic($sic) {
         $this->sic = $sic;
-    
+
         return $this;
     }
 
     /**
      * Get sic
      *
-     * @return string 
+     * @return string
      */
-    public function getSic()
-    {
+    public function getSic() {
         return $this->sic;
     }
+
+    /**
+     * Set exchange
+     *
+     * @param string $exchange
+     * @return Company
+     */
+    public function setExchange($exchange) {
+        $this->exchange = $exchange;
+
+        return $this;
+    }
+
+    /**
+     * Get exchange
+     *
+     * @return string
+     */
+    public function getExchange() {
+        return $this->exchange;
+    }
+
 }
