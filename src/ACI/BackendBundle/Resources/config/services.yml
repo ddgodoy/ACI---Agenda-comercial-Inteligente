@@ -3,3 +3,7 @@ services:
     class: ACI\BackendBundle\Services\RankandfiledService
     arguments: ["@doctrine.orm.entity_manager"]
 
+  aci_app.crawler.sec:
+    class: ACI\BackendBundle\Services\SECService
+    arguments: ["@doctrine.orm.entity_manager"]
+

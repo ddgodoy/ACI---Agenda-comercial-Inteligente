@@ -61,6 +61,8 @@ class CompanyController extends Controller {
             $row [] = $entity->getIrsNumber();
             $row [] = $entity->getSic();
             $row [] = $entity->getExchange();
+            $row [] = $entity->getBusinessAddress();
+            $row [] = $entity->getMailingAddress();
             $output['aaData'] [] = $row;
         }
 

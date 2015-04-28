@@ -37,11 +37,14 @@ class BackendController extends Controller {
     }
 
     /**
-     * @Route("/crawlercountry", name="admin_crawlercountry")
+     * @Route("/crawlerdata", name="admin_data")
      * @Template()
      */
     public function crawlerCountryAction() {
-        $this->container->get('aci_app.crawler.rankandfiled')->parseHtmlCountries();
+        $entities = $this->getDoctrine()->getRepository('BackendBundle:Company')->findAll();
+        foreach ($entities as $entity) {
+            $this->container->get('aci_app.crawler.sec')->parseAddressData($entity->getCompleteCik());
+        }
     }
 
     /**

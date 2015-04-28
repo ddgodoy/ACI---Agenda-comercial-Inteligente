@@ -57,6 +57,18 @@ class Company {
      */
     private $exchange;
 
+    /**
+     * @var string $business_address
+     * @ORM\Column(name="business_address", type="string", length=512, nullable=true)
+     */
+    private $business_address;
+
+    /**
+     * @var string $mailing_address
+     * @ORM\Column(name="mailing_address", type="string", length=512, nullable=true)
+     */
+    private $mailing_address;
+
     public function __construct() {
 
     }
@@ -194,6 +206,61 @@ class Company {
      */
     public function getExchange() {
         return $this->exchange;
+    }
+
+    /**
+     * Set business_address
+     *
+     * @param string $businessAddress
+     * @return Company
+     */
+    public function setBusinessAddress($businessAddress) {
+        $this->business_address = $businessAddress;
+
+        return $this;
+    }
+
+    /**
+     * Get business_address
+     *
+     * @return string
+     */
+    public function getBusinessAddress() {
+        return $this->business_address;
+    }
+
+    /**
+     * Set mailing_address
+     *
+     * @param string $mailingAddress
+     * @return Company
+     */
+    public function setMailingAddress($mailingAddress) {
+        $this->mailing_address = $mailingAddress;
+
+        return $this;
+    }
+
+    /**
+     * Get mailing_address
+     *
+     * @return string
+     */
+    public function getMailingAddress() {
+        return $this->mailing_address;
+    }
+
+    public function getCompleteCik() {
+        if (strlen($this->getCik()) < 10) {
+            $cant = 10 - strlen($this->getCik());
+            $return = "";
+            for ($i = 0; $i < $cant; $i++) {
+                $return.="0";
+            }
+            $return.=$this->getCik();
+            return $return;
+        } else
+            return $this->getCik();
     }
 
 }
