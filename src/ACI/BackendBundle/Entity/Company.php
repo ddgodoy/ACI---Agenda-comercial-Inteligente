@@ -23,7 +23,7 @@ class Company {
 
     /**
      * @var string $name
-     * @ORM\Column(name="name", type="string", length=50, nullable=false)
+     * @ORM\Column(name="name", type="string", length=255, nullable=false)
      */
     private $name;
 
@@ -35,25 +35,25 @@ class Company {
 
     /**
      * @var string $ticker
-     * @ORM\Column(name="ticker", type="string", length=50, nullable=false)
+     * @ORM\Column(name="ticker", type="string", length=255, nullable=true)
      */
     private $ticker;
 
     /**
      * @var string $irs_number
-     * @ORM\Column(name="irs_number", type="string", length=50, nullable=true)
+     * @ORM\Column(name="irs_number", type="string", length=255, nullable=true)
      */
     private $irs_number;
 
     /**
      * @var string $sic
-     * @ORM\Column(name="sic", type="string", length=50, nullable=true)
+     * @ORM\Column(name="sic", type="string", length=255, nullable=true)
      */
     private $sic;
 
     /**
      * @var string $exchange
-     * @ORM\Column(name="exchange", type="string", length=50, nullable=true)
+     * @ORM\Column(name="exchange", type="string", length=255, nullable=true)
      */
     private $exchange;
 

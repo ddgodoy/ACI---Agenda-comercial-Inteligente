@@ -19,4 +19,15 @@ class IndustryRepository extends EntityRepository {
         return $query->getOneOrNullResult();
     }
 
+    public function datatable($offset = null, $limit = null, $order = null, $dir = null, $sSearch = null) {
+        $dql = "SELECT c FROM ACI\BackendBundle\Entity\Industry c WHERE c.id LIKE :sSearch OR c.name LIKE :sSearch OR c.sic LIKE :sSearch OR c.naics LIKE :sSearch OR c.naics_clasification LIKE :sSearch  ORDER BY c.{$order} {$dir}";
+
+        $em = $this->getEntityManager();
+        $query = $em->createQuery($dql);
+        $query->setParameter("sSearch", '%' . $sSearch . '%');
+        $query->setFirstResult($offset);
+        $query->setMaxResults($limit);
+        return $query->getResult();
+    }
+
 }

@@ -146,7 +146,6 @@ class BackendController extends Controller {
             exit("El archivo no existe.");
         }
         $objPHPExcel = PHPExcel_IOFactory::load($file);
-
         foreach ($objPHPExcel->getWorksheetIterator() as $worksheet) {
             $columnA = 'A';
             $columnB = 'B';
@@ -165,31 +164,24 @@ class BackendController extends Controller {
                 $cellH = $worksheet->getCell($columnH . $row);
 
                 $company = new \ACI\BackendBundle\Entity\Company();
-
                 $company->setCik($cellA->getValue());
                 $company->setName($cellC->getValue());
                 $company->setTicker($cellB->getValue());
                 $company->setSic($cellE->getValue());
                 $company->setIrsNumber($cellH->getValue());
                 $company->setExchange($cellD->getValue());
-
-
-
                 $em->persist($company);
                 $counter++;
             }
 
             try {
                 $em->flush();
-                echo "Se procesaron " . $counter . " industrias.";
+                echo "Se procesaron " . $counter . " compañias.";
                 return new \Symfony\Component\HttpFoundation\Response("!Listo");
             } catch (Exception $exc) {
                 echo $exc->getTraceAsString();
             }
         }
-
-
-        // Echo memory peak usage
     }
 
 }

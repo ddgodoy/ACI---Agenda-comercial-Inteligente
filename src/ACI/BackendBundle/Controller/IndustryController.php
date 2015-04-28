@@ -7,7 +7,6 @@ use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Template;
-use Symfony\Component\Security\Acl\Permission\MaskBuilder;
 use ACI\BackendBundle\Form\IndustryType;
 
 /**
@@ -25,58 +24,50 @@ class IndustryController extends Controller {
      */
     public function indexAction() {
         $em = $this->getDoctrine()->getManager();
-        $entities = $this->getDoctrine()->getRepository('BackendBundle:Industry')->findAll();
-        return $this->render('BackendBundle:Industry:index.html.twig', array("entities" => $entities));
+        return $this->render('BackendBundle:Industry:index.html.twig');
     }
 
     /**
      * Lists all Industry entities.
      *
-     * @Route("/list", name="admin_industry_list")
+     * @Route("/industrylist", name="admin_industry_list")
+     * @Method("GET")
      * @Template()
      */
-    public function listAction() {
-        $this->_datatable();
-        return $this->render('BackendBundle:Industry:list.html.twig');
-    }
+    public function industrylistAction(Request $request) {
+        $em = $this->getDoctrine()->getManager();
 
-    /**
-     * set datatable configs
-     * @return \CoolwayFestivales\DatatableBundle\Util\Datatable
-     */
-    private function _datatable() {
-        $qb = $this->getDoctrine()->getManager()->createQueryBuilder();
-        $qb->from("BackendBundle:Industry", "entity")
-                ->orderBy("entity.id", "desc");
-        $datatable = $this->get('datatable')
-                ->setFields(
-                        array(
-                            'Nombre' => 'entity.name',
-                            "_identifier_" => 'entity.id')
-                )
-                ->setHasAction(false)
-//                ->setAcl(array("OWNER")) //OWNER,OPERATOR,VIEW
-                ->setSearch(TRUE);
+        $aColumns = array('id', 'name', 'sic', 'naics', 'naics_clasification');
+        $iDisplayLength = $request->get("iDisplayLength");
+        $iDisplayStart = $request->get("iDisplayStart");
 
-        $datatable->getQueryBuilder()->setDoctrineQueryBuilder($qb);
-        return $datatable;
-    }
+        $order = $aColumns[$request->get("iSortCol_0")];
+        $dir = $request->get("sSortDir_0");
+        $sSearch = $request->get("sSearch");
+        $entities = $this->getDoctrine()->getRepository('BackendBundle:Industry')->datatable($iDisplayStart, $iDisplayLength, $order, $dir, $sSearch);
+        $total = count($this->getDoctrine()->getRepository('BackendBundle:Industry')->findAll());
 
-    /**
-     * @Route("/admin_industry_grid", name="admin_industry_grid")
-     * @Template()
-     */
-    public function gridAction() {
-        return $this->_datatable()->execute();
-    }
+        $output = array(
+            "sEcho" => intval($request->get('sEcho')),
+            "iTotalRecords" => count($entities),
+            "iTotalDisplayRecords" => $total,
+            "aaData" => array()
+        );
 
-    /**
-     * @Route("/datatable", name="datatable_industry")
-     * @Template()
-     */
-    public function datatableAction() {
-        $this->_datatable();
-        return $this->render('BackendBundle:Industry:index.html.twig');
+
+        foreach ($entities as $entity) {
+            $row = array();
+            $row [] = $entity->getId();
+            $row [] = $entity->getName();
+            $row [] = $entity->getSic();
+            $row [] = $entity->getNaics();
+            $row [] = $entity->getNaicsClasification();
+            $output['aaData'] [] = $row;
+        }
+
+
+        echo json_encode($output);
+        die;
     }
 
     /**
