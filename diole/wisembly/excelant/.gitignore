@@ -1,6 +1,0 @@
-/bin
-/coverage
-/vendor
-
-phpunit.xml
-composer.lock

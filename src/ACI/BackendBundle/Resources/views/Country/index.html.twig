@@ -2,6 +2,7 @@
 
 {% block stylesheets %}
     {{parent()}}
+
 {% endblock %}
 
 {%block content%}
@@ -17,7 +18,7 @@
 
             </li>
             <li>
-                <a href="{{path("admin_country")}}">Gestionar Países</a>
+                <a href="{{path("admin_country")}}">Gestionar Pa&iacute;ses</a>
             </li>
 
         </ul>
@@ -31,26 +32,24 @@
             <div class="portlet box blue-madison">
                 <div class="portlet-title">
                     <div class="caption">
-                        <i class="fa fa-globe"></i>Gestionar Países
+                        <i class="fa fa-globe"></i>Gestionar Pa&iacute;ses
 
                     </div>
-                    <div class="tools">
-                        <a href="javascript:;" class="reload">
-                        </a>
-                        <a href="javascript:;" class="remove">
-                        </a>
-                    </div>
+
                 </div>
                 <div class="portlet-body">
                     <div class="table-toolbar">
                         <div class="row">
                             <div class="col-md-9">
-                                <button data-toggle="modal" id="ajax-demo" class=" btn green">
-                                    Nuevo <i class="fa fa-plus"></i></button>
-                                <button data-toggle="modal" id="ajax-demo" class=" btn blue" >
-                                    Editar <i class="fa fa-pencil"></i></button>
-                                <button data-toggle="modal" id="ajax-demo" class=" btn red">
-                                    Eliminar <i class="fa fa-trash-o"></i></button>
+
+                                <a data-toggle="modal" data-target="#ajax" href="{{path("admin_country_new")}}" class=" btn green">
+                                    Nuevo <i class="fa fa-plus"></i></a>
+                                <a data-toggle="modal" data-target="#modalEdit" href="javascript:void(0)" id="btnedit" class="btn blue" disabled="disabled">
+                                    Editar <i class="fa fa-pencil"></i></a>
+                                <button id="btndelete" class=" btn red" disabled="disabled">
+                                    Eliminar <i class="fa fa-trash-o" ></i></button>
+                                <a data-toggle="modal" data-target="#modalDetail" id="btndetail" href="javascript:void(0)" class=" btn blue" disabled="disabled">
+                                    Detalles <i class="fa fa-list"></i></a>
 
                             </div>
                             <div class="col-md-6">
@@ -67,23 +66,17 @@
                                 <th>
                                     Nombre
                                 </th>
+                                <th>
+                                    C&oacute;digo
+                                </th>
+
+
+
 
                             </tr>
                         </thead>
                         <tbody>
-                            {%for entity in entities%}
 
-                                <tr>
-                                    <td>
-                                        {{entity.id}}
-                                    </td>
-                                    <td>
-                                        {{entity.name}}
-                                    </td>
-
-                                </tr>
-
-                            {%endfor%}
 
 
                         </tbody>
@@ -93,7 +86,43 @@
 
         </div>
     </div>
-    <div id="ajax-modal" class="modal fade" tabindex="-1">
+    <div class="modal fade" id="ajax" role="basic" aria-hidden="true">
+        <div class="page-loading page-loading-boxed">
+            <img src="{{asset('assets/global/img/loading-spinner-grey.gif')}}" alt="" class="loading">
+            <span>
+                &nbsp;&nbsp;Cargando... </span>
+        </div>
+        <div class="modal-dialog">
+            <div class="modal-content">
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="modalDetail" tabindex="-1" role="dialog" aria-labelledby="modalDetailLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="myModalLabel">Detalles</h4>
+                </div>
+                <div class="modal-body">
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Cerrar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="modalEdit" role="basic" aria-hidden="true">
+        <div class="page-loading page-loading-boxed">
+            <img src="{{asset('assets/global/img/loading-spinner-grey.gif')}}" alt="" class="loading">
+            <span>
+                &nbsp;&nbsp;Cargando... </span>
+        </div>
+        <div class="modal-dialog">
+            <div class="modal-content">
+            </div>
+        </div>
     </div>
 {%endblock%}
 
@@ -105,12 +134,31 @@
 
     {{parent()}}
     <script>
+        var columnas = new Array();
+        var counter = 0;
+
+        function Inspector(data) {
+            var btndetails = $('#btndetail');
+            var btnedit = $('#btnedit');
+            var btndelete = $('#btndelete');
+            if (data == 1) {
+                btndetails.removeAttr('disabled');
+                btnedit.removeAttr('disabled');
+
+            } else {
+                btnedit.attr('disabled', 'disabled');
+                btndetails.attr('disabled', 'disabled');
+            }
+
+            if (data > 0) {
+                btndelete.removeAttr('disabled');
+            }
+            else
+                btndelete.attr('disabled', 'disabled');
+        }
         var initTable1 = function () {
             var table = $('#sample_1');
 
-            /* Table tools samples: https://www.datatables.net/release-datatables/extras/TableTools/ */
-
-            /* Set tabletools buttons and button container */
 
             $.extend(true, $.fn.DataTable.TableTools.classes, {
                 "container": "btn-group tabletools-dropdown-on-portlet",
@@ -124,9 +172,10 @@
             });
 
             var oTable = table.dataTable({
-                "order": [
-                    [0, 'asc']
-                ],
+                "bProcessing": true,
+                "bServerSide": true,
+                "bAutoWidth": false,
+                "sAjaxSource": "{{path("admin_country_list")}}",
                 "lengthMenu": [
                     [5, 15, 20, -1],
                     [5, 15, 20, "All"] // change per page values here
@@ -136,8 +185,29 @@
                 "dom": "<'row' <'col-md-12'T>><'row'<'col-md-6 col-sm-12'l><'col-md-6 col-sm-12'f>r><'table-scrollable't><'row'<'col-md-5 col-sm-12'i><'col-md-7 col-sm-12'p>>", // horizobtal scrollable datatable
 
                 "tableTools": {
-                    "aButtons": []
+                    "aButtons": [],
+                    "sRowSelect": "multi",
+                    "fnRowSelected": function (node) {
+                        counter++;
+                        var value = oTable.dataTable().fnGetData(node);
+                        columnas.push(value[0]);
+                        Inspector(counter);
+                    },
+                    "fnRowDeselected": function (node) {
+                        counter--;
+                        var value = oTable.dataTable().fnGetData(node);
+                        Inspector(counter);
+                        var index = columnas.indexOf(value[0]);
+                        if (index > -1) {
+                            columnas.splice(index, 1);
+                        }
+
+                    }
+                },
+                "language": {
+                    "url": "{{asset('assets/js/i18n/Spanish.json')}}"
                 }
+
             });
 
             var tableWrapper = $('#sample_1_wrapper'); // datatable creates the table wrapper by adding with id {your_table_jd}_wrapper
@@ -147,29 +217,31 @@
 
         initTable1();
 
-        var $modal = $('#ajax-modal');
+        $("#modalDetail").on("show.bs.modal", function (e) {
+            var link = "{{path("admin_country_show")}}";
+            $(this).find(".modal-body").load(link + "?id=" + columnas[0]);
+        });
+        $("#modalEdit").on("show.bs.modal", function (e) {
+            var link = "{{path("admin_country_edit")}}";
+            $(this).find(".modal-content").load(link + "?id=" + columnas[0]);
+        });
 
-        {#  $('#ajax-demo').on('click', function () {
-              // create the backdrop and wait for next modal to be triggered
+        $("#btndelete").on("click", function () {
+            $.ajax({
+                url: "{{path("admin_country_batchdelete")}}",
+                data: {"ids": columnas.toString()},
+                dataType: "json",
+                context: document.body
+            }).done(function (data) {
+                if (data.success) {
+                    toastr.success(data.message);
+                    window.location.href = "{{path('admin_country')}}";
+                }
+                else
+                    toastr.error(data.message);
 
-
-              $modal.load('{{path("admin_country_new")}}', '', function () {
-                  $modal.modal();
-              });
-          });#}
-
-              $modal.on('click', '.update', function () {
-                  $modal.modal('loading');
-                  setTimeout(function () {
-                      $modal
-                              .modal('loading')
-                              .find('.modal-body')
-                              .prepend('<div class="alert alert-info fade in">' +
-                                      'Updated!<button type="button" class="close" data-dismiss="alert">&times;</button>' +
-                                      '</div>');
-                  }, 1000);
-              });
-
+            });
+        })
     </script>
 {%endblock%}
 

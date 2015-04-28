@@ -23,59 +23,50 @@ class CompanyController extends Controller {
      * @Template()
      */
     public function indexAction() {
-        $em = $this->getDoctrine()->getManager();
-        $entities = $this->getDoctrine()->getRepository('BackendBundle:Company')->findAll();
-        return $this->render('BackendBundle:Company:index.html.twig', array("entities" => $entities));
+        return $this->render('BackendBundle:Company:index.html.twig');
     }
 
     /**
      * Lists all Company entities.
      *
-     * @Route("/list", name="admin_company_list")
+     * @Route("/companylist", name="admin_company_list")
+     * @Method("GET")
      * @Template()
      */
-    public function listAction() {
-        $this->_datatable();
-        return $this->render('BackendBundle:Company:list.html.twig');
-    }
+    public function companylistAction(Request $request) {
+        $aColumns = array('id', 'name', 'cik', 'ticker', 'irs_number', 'sic', 'exchange');
+        $iDisplayLength = $request->get("iDisplayLength");
+        $iDisplayStart = $request->get("iDisplayStart");
 
-    /**
-     * set datatable configs
-     * @return \CoolwayFestivales\DatatableBundle\Util\Datatable
-     */
-    private function _datatable() {
-        $qb = $this->getDoctrine()->getManager()->createQueryBuilder();
-        $qb->from("BackendBundle:Company", "entity")
-                ->orderBy("entity.id", "desc");
-        $datatable = $this->get('datatable')
-                ->setFields(
-                        array(
-                            'Nombre' => 'entity.name',
-                            "_identifier_" => 'entity.id')
-                )
-                ->setHasAction(false)
-//                ->setAcl(array("OWNER")) //OWNER,OPERATOR,VIEW
-                ->setSearch(TRUE);
+        $order = $aColumns[$request->get("iSortCol_0")];
+        $dir = $request->get("sSortDir_0");
+        $sSearch = $request->get("sSearch");
+        $entities = $this->getDoctrine()->getRepository('BackendBundle:Company')->datatable($iDisplayStart, $iDisplayLength, $order, $dir, $sSearch);
+        $total = count($this->getDoctrine()->getRepository('BackendBundle:Company')->findAll());
 
-        $datatable->getQueryBuilder()->setDoctrineQueryBuilder($qb);
-        return $datatable;
-    }
+        $output = array(
+            "sEcho" => intval($request->get('sEcho')),
+            "iTotalRecords" => count($entities),
+            "iTotalDisplayRecords" => $total,
+            "aaData" => array()
+        );
 
-    /**
-     * @Route("/admin_company_grid", name="admin_company_grid")
-     * @Template()
-     */
-    public function gridAction() {
-        return $this->_datatable()->execute();
-    }
 
-    /**
-     * @Route("/datatable", name="datatable_company")
-     * @Template()
-     */
-    public function datatableAction() {
-        $this->_datatable();
-        return $this->render('BackendBundle:Company:index.html.twig');
+        foreach ($entities as $entity) {
+            $row = array();
+            $row [] = $entity->getId();
+            $row [] = $entity->getName();
+            $row [] = $entity->getCik();
+            $row [] = $entity->getTicker();
+            $row [] = $entity->getIrsNumber();
+            $row [] = $entity->getSic();
+            $row [] = $entity->getExchange();
+            $output['aaData'] [] = $row;
+        }
+
+
+        echo json_encode($output);
+        die;
     }
 
     /**

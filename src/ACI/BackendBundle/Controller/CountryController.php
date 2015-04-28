@@ -24,59 +24,46 @@ class CountryController extends Controller {
      * @Template()
      */
     public function indexAction() {
-        $em = $this->getDoctrine()->getManager();
-        $entities = $this->getDoctrine()->getRepository('BackendBundle:Country')->findAll();
-        return $this->render('BackendBundle:Country:index.html.twig', array("entities" => $entities));
+        return $this->render('BackendBundle:Country:index.html.twig');
     }
 
     /**
      * Lists all Country entities.
      *
-     * @Route("/list", name="admin_country_list")
+     * @Route("/countrylist", name="admin_country_list")
+     * @Method("GET")
      * @Template()
      */
-    public function listAction() {
-        $this->_datatable();
-        return $this->render('BackendBundle:Country:list.html.twig');
-    }
+    public function countrylistAction(Request $request) {
+        $aColumns = array('id', 'name', 'code');
+        $iDisplayLength = $request->get("iDisplayLength");
+        $iDisplayStart = $request->get("iDisplayStart");
 
-    /**
-     * set datatable configs
-     * @return \ACI\DatatableBundle\Util\Datatable
-     */
-    private function _datatable() {
-        $qb = $this->getDoctrine()->getManager()->createQueryBuilder();
-        $qb->from("BackendBundle:Country", "entity")
-                ->orderBy("entity.id", "desc");
-        $datatable = $this->get('datatable')
-                ->setFields(
-                        array(
-                            'Nombre' => 'entity.name',
-                            "_identifier_" => 'entity.id')
-                )
-                ->setHasAction(false)
-//                ->setAcl(array("OWNER")) //OWNER,OPERATOR,VIEW
-                ->setSearch(TRUE);
+        $order = $aColumns[$request->get("iSortCol_0")];
+        $dir = $request->get("sSortDir_0");
+        $sSearch = $request->get("sSearch");
+        $entities = $this->getDoctrine()->getRepository('BackendBundle:Country')->datatable($iDisplayStart, $iDisplayLength, $order, $dir, $sSearch);
+        $total = count($this->getDoctrine()->getRepository('BackendBundle:Country')->findAll());
 
-        $datatable->getQueryBuilder()->setDoctrineQueryBuilder($qb);
-        return $datatable;
-    }
+        $output = array(
+            "sEcho" => intval($request->get('sEcho')),
+            "iTotalRecords" => count($entities),
+            "iTotalDisplayRecords" => $total,
+            "aaData" => array()
+        );
 
-    /**
-     * @Route("/admin_country_grid", name="admin_country_grid")
-     * @Template()
-     */
-    public function gridAction() {
-        return $this->_datatable()->execute();
-    }
 
-    /**
-     * @Route("/datatable", name="datatable_country")
-     * @Template()
-     */
-    public function datatableAction() {
-        $this->_datatable();
-        return $this->render('BackendBundle:Country:index.html.twig');
+        foreach ($entities as $entity) {
+            $row = array();
+            $row [] = $entity->getId();
+            $row [] = $entity->getName();
+            $row [] = $entity->getCode();
+            $output['aaData'] [] = $row;
+        }
+
+
+        echo json_encode($output);
+        die;
     }
 
     /**
@@ -269,7 +256,7 @@ class CountryController extends Controller {
     /**
      * Elimina a petición country entities.
      * dado un array de ids
-     * @Route("/bachdelete", name="admin_country_bachdelete")
+     * @Route("/batchdelete", name="admin_country_batchdelete")
      * @Template()
      */
     public function batchdeleteAction() {
