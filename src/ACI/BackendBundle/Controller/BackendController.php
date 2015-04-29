@@ -42,9 +42,12 @@ class BackendController extends Controller {
      */
     public function crawlerCountryAction() {
         $entities = $this->getDoctrine()->getRepository('BackendBundle:Company')->findAll();
+        $em = $this->getDoctrine()->getManager();
         foreach ($entities as $entity) {
-            $this->container->get('aci_app.crawler.sec')->parseAddressData($entity->getCompleteCik());
+            $this->container->get('aci_app.crawler.sec')->parseAddressData($entity);
         }
+        $em->flush();
+        
     }
 
     /**

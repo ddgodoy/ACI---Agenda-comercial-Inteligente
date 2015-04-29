@@ -29,5 +29,14 @@ class CompanyRepository extends EntityRepository {
         $query->setMaxResults($limit);
         return $query->getResult();
     }
+  
+    public function getMissingData() {
+        $dql = "SELECT c FROM ACI\BackendBundle\Entity\Company c";
+
+        $em = $this->getEntityManager();
+        $query = $em->createQuery($dql);
+        $query->setMaxResults(10);
+        return $query->getResult();
+    }
 
 }
