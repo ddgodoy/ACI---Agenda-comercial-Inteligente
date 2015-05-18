@@ -69,6 +69,24 @@ class Company {
      */
     private $mailing_address;
 
+    /**
+     * @var string $total_current_assets
+     * @ORM\Column(name="total_current_assets", type="string", length=255,  nullable=true)
+     */
+    private $total_current_assets;
+
+    /**
+     * @var string $total_assets
+     * @ORM\Column(name="total_assets", type="string", length=255,  nullable=true)
+     */
+    private $total_assets;
+
+    /**
+     * @var string $total_current_liabilities
+     * @ORM\Column(name="ttotal_current_liabilities", type="string", length=255,  nullable=true)
+     */
+    private $total_current_liabilities;
+
     public function __construct() {
 
     }
@@ -263,4 +281,73 @@ class Company {
             return $this->getCik();
     }
 
+
+    /**
+     * Set total_current_assets
+     *
+     * @param string $totalCurrentAssets
+     * @return Company
+     */
+    public function setTotalCurrentAssets($totalCurrentAssets)
+    {
+        $this->total_current_assets = $totalCurrentAssets;
+
+        return $this;
+    }
+
+    /**
+     * Get total_current_assets
+     *
+     * @return string 
+     */
+    public function getTotalCurrentAssets()
+    {
+        return $this->total_current_assets;
+    }
+
+    /**
+     * Set total_assets
+     *
+     * @param string $totalAssets
+     * @return Company
+     */
+    public function setTotalAssets($totalAssets)
+    {
+        $this->total_assets = $totalAssets;
+
+        return $this;
+    }
+
+    /**
+     * Get total_assets
+     *
+     * @return string 
+     */
+    public function getTotalAssets()
+    {
+        return $this->total_assets;
+    }
+
+    /**
+     * Set total_current_liabilities
+     *
+     * @param string $totalCurrentLiabilities
+     * @return Company
+     */
+    public function setTotalCurrentLiabilities($totalCurrentLiabilities)
+    {
+        $this->total_current_liabilities = $totalCurrentLiabilities;
+
+        return $this;
+    }
+
+    /**
+     * Get total_current_liabilities
+     *
+     * @return string 
+     */
+    public function getTotalCurrentLiabilities()
+    {
+        return $this->total_current_liabilities;
+    }
 }
