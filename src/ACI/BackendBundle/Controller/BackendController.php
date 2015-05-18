@@ -196,6 +196,9 @@ class BackendController extends Controller {
     public function parse10kAction() {
         $em = $this->getDoctrine()->getManager();
         $file = $this->get('kernel')->getRootDir() . "/../data/form.idx";
+        $ftp_server = "ftp.sec.gov";
+        $conn_id = ftp_connect($ftp_server);
+        $login_result = ftp_login($conn_id, 'anonymous', '');
         if (!file_exists($file)) {
             exit("El archivo no existe.");
         } else {
@@ -204,9 +207,6 @@ class BackendController extends Controller {
             $i = 0;
             while ($line = fgets($fh)) {
 
-                if ($i == 4)
-                    break;
-// <... Do your work with the line ...>
                 $precik = explode("edgar/data/", $line);
                 $cik = explode("/", $precik[1]);
                 $company = $this->getDoctrine()->getRepository('BackendBundle:Company')->findOneBy(array("cik" => $cik[0]));
@@ -222,52 +222,70 @@ class BackendController extends Controller {
                         echo ("El archivo no existe.");
                     } else {
 
+                        $local_file = $this->get('kernel')->getRootDir() . "/../data/FinancialReport/" . $cik[0] . ".xlsx";
+                        $server_file = "edgar/data/" . $cik[0] . "/15/" . $lastpart . "/Financial_Report.xlsx";
 
 
-//                        $objPHPExcel = PHPExcel_IOFactory::load($excel_file);
-//
-//                        foreach ($objPHPExcel->getWorksheetIterator() as $worksheet) {
-//                            $columnA = 'A';
-//                            $columnB = 'B';
-//                            $columnC = 'C';
-//                            $columnD = 'D';
-//                            $columnE = 'E';
-//                            $columnH = 'H';
-//                            $lastRow = $worksheet->getHighestRow();
-//                            for ($row = 2; $row <= $lastRow; $row++) {
-//                                $cellA = $worksheet->getCell($columnA . $row);
-//
-//                                if ($cellA == "TOTAL CURRENT ASSETS")
-//                                    echo $worksheet->getCell($columnB . $row);
-//                                echo "<br>";
-//                            }
-//                        }
+                        $handle = fopen($local_file, 'w');
 
-                        $local_file = $this->get('kernel')->getRootDir() . "/data/" . $cik[0] . "_FinancialReport.xlsx";
-                        $server_file = $excel_file;
-                        $ftp_server = "ftp.sec.gov";
-                        $ftp_user_name = "";
-                        $ftp_user_pass = "";
 
-                        $conn_id = ftp_connect($ftp_server);
-
-// login with username and password
-                        $login_result = ftp_login($conn_id, 'anonymous', '');
-
-// try to download $server_file and save to $local_file
-                        if (ftp_put($conn_id, $server_file, $local_file, FTP_BINARY)) {
-                            echo "Successfully written to $local_file\n";
+                        if ((!$conn_id) || (!$login_result)) {
+                            echo "FTP connection has failed!";
+                            echo "Attempted to connect to $ftp_server";
+                            exit;
                         } else {
-                            echo "There was a problem\n";
+                            echo "Connected to $ftp_server";
                         }
-// close the connection
-                        ftp_close($conn_id);
-                    }
-                }
 
-                $i++;
+                        $d = ftp_nb_fget($conn_id, $handle, $server_file, FTP_BINARY);
+
+                        while ($d == FTP_MOREDATA) {
+                            $d = ftp_nb_continue($conn_id);
+                        }
+
+                        if ($d != FTP_FINISHED) {
+                            echo "Error downloading $server_file";
+                            exit(1);
+                        }
+
+
+                        fclose($handle);
+
+                        $objPHPExcel = PHPExcel_IOFactory::load($local_file);
+
+                        foreach ($objPHPExcel->getWorksheetIterator() as $worksheet) {
+                            $columnA = 'A';
+                            $columnB = 'B';
+                            $columnC = 'C';
+                            $columnD = 'D';
+                            $columnE = 'E';
+                            $columnH = 'H';
+                            $lastRow = $worksheet->getHighestRow();
+                            for ($row = 2; $row <= $lastRow; $row++) {
+                                $cellA = $worksheet->getCell($columnA . $row);
+
+                                if (strtolower($cellA) == "total currect assets") {
+                                    $company->setTotalCurrentAssets($worksheet->getCell($columnB . $row));
+                                }
+                                if (strtolower($cellA) == "total assets") {
+                                    $company->setTotalAssets($worksheet->getCell($columnB . $row));
+                                }
+                                if (strtolower($cellA) == "cash and cash equivalents") {
+                                    $company->setCashAndCashEquivalents($worksheet->getCell($columnB . $row));
+                                }
+                                if (strtolower($cellA) == "long-term debt") {
+                                    $company->setLongTermDebt($worksheet->getCell($columnB . $row));
+                                }
+
+                                $em->persist($company);
+                            }
+                        }
+                    }
+                    $em->flush();
+                }
             }
             fclose($fh);
+            ftp_close($conn_id);
             die;
         }
     }

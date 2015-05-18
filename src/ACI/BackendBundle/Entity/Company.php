@@ -83,9 +83,27 @@ class Company {
 
     /**
      * @var string $total_current_liabilities
-     * @ORM\Column(name="ttotal_current_liabilities", type="string", length=255,  nullable=true)
+     * @ORM\Column(name="total_current_liabilities", type="string", length=255,  nullable=true)
      */
     private $total_current_liabilities;
+
+    /**
+     * @var string $cash_and_cash_equivalents
+     * @ORM\Column(name="cash_and_cash_equivalents", type="string", length=255,  nullable=true)
+     */
+    private $cash_and_cash_equivalents;
+
+    /**
+     * @var string $long_term_debt
+     * @ORM\Column(name="long_term_debt", type="string", length=255,  nullable=true)
+     */
+    private $long_term_debt;
+
+    /**
+     * @var string $retained_earnings
+     * @ORM\Column(name="retained_earnings", type="string", length=255,  nullable=true)
+     */
+    private $retained_earnings;
 
     public function __construct() {
 
@@ -279,6 +297,111 @@ class Company {
             return $return;
         } else
             return $this->getCik();
+    }
+
+    /**
+     * Set total_current_assets
+     *
+     * @param string $totalCurrentAssets
+     * @return Company
+     */
+    public function setTotalCurrentAssets($totalCurrentAssets) {
+        $this->total_current_assets = $totalCurrentAssets;
+
+        return $this;
+    }
+
+    /**
+     * Get total_current_assets
+     *
+     * @return string
+     */
+    public function getTotalCurrentAssets() {
+        return $this->total_current_assets;
+    }
+
+    /**
+     * Set total_assets
+     *
+     * @param string $totalAssets
+     * @return Company
+     */
+    public function setTotalAssets($totalAssets) {
+        $this->total_assets = $totalAssets;
+
+        return $this;
+    }
+
+    /**
+     * Get total_assets
+     *
+     * @return string
+     */
+    public function getTotalAssets() {
+        return $this->total_assets;
+    }
+
+    /**
+     * Set total_current_liabilities
+     *
+     * @param string $totalCurrentLiabilities
+     * @return Company
+     */
+    public function setTotalCurrentLiabilities($totalCurrentLiabilities) {
+        $this->total_current_liabilities = $totalCurrentLiabilities;
+
+        return $this;
+    }
+
+    /**
+     * Get total_current_liabilities
+     *
+     * @return string
+     */
+    public function getTotalCurrentLiabilities() {
+        return $this->total_current_liabilities;
+    }
+
+    /**
+     * Set cash_and_cash_equivalents
+     *
+     * @param string $cashAndCashEquivalents
+     * @return Company
+     */
+    public function setCashAndCashEquivalents($cashAndCashEquivalents) {
+        $this->cash_and_cash_equivalents = $cashAndCashEquivalents;
+
+        return $this;
+    }
+
+    /**
+     * Get cash_and_cash_equivalents
+     *
+     * @return string
+     */
+    public function getCashAndCashEquivalents() {
+        return $this->cash_and_cash_equivalents;
+    }
+
+    /**
+     * Set long_term_debt
+     *
+     * @param string $longTermDebt
+     * @return Company
+     */
+    public function setLongTermDebt($longTermDebt) {
+        $this->long_term_debt = $longTermDebt;
+
+        return $this;
+    }
+
+    /**
+     * Get long_term_debt
+     *
+     * @return string
+     */
+    public function getLongTermDebt() {
+        return $this->long_term_debt;
     }
 
 }
