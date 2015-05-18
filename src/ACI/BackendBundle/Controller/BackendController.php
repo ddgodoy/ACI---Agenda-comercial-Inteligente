@@ -26,7 +26,7 @@ class BackendController extends Controller {
      * @Route("/login_check", name="_security_check")
      */
     public function securityCheckAction() {
-        // The security layer will intercept this request
+// The security layer will intercept this request
     }
 
     /**
@@ -46,6 +46,7 @@ class BackendController extends Controller {
         foreach ($entities as $entity) {
             $this->container->get('aci_app.crawler.sec')->parseTypeData($entity);
         }
+        $em->flush();
     }
 
     /**
@@ -87,7 +88,7 @@ class BackendController extends Controller {
         }
 
 
-        // Echo memory peak usage
+// Echo memory peak usage
     }
 
     /**
@@ -136,7 +137,7 @@ class BackendController extends Controller {
         }
 
 
-        // Echo memory peak usage
+// Echo memory peak usage
     }
 
     /**
@@ -185,6 +186,89 @@ class BackendController extends Controller {
             } catch (Exception $exc) {
                 echo $exc->getTraceAsString();
             }
+        }
+    }
+
+    /**
+     * @Route("/parse10k", name="admin_parse10k")
+     * @Template()
+     */
+    public function parse10kAction() {
+        $em = $this->getDoctrine()->getManager();
+        $file = $this->get('kernel')->getRootDir() . "/../data/form.idx";
+        if (!file_exists($file)) {
+            exit("El archivo no existe.");
+        } else {
+            $fh = fopen($file, 'r');
+
+            $i = 0;
+            while ($line = fgets($fh)) {
+
+                if ($i == 4)
+                    break;
+// <... Do your work with the line ...>
+                $precik = explode("edgar/data/", $line);
+                $cik = explode("/", $precik[1]);
+                $company = $this->getDoctrine()->getRepository('BackendBundle:Company')->findOneBy(array("cik" => $cik[0]));
+
+                if ($company) {
+                    $lastpart = $cik[1];
+                    $lastpart = str_replace("-", "", $lastpart);
+                    $lastpart = str_replace(".txt", "", $lastpart);
+                    $lastpart = trim($lastpart);
+
+                    $excel_file = "ftp://ftp.sec.gov/edgar/data/" . $cik[0] . "/15/" . $lastpart . "/Financial_Report.xlsx";
+                    if (!file_exists($excel_file)) {
+                        echo ("El archivo no existe.");
+                    } else {
+
+
+
+//                        $objPHPExcel = PHPExcel_IOFactory::load($excel_file);
+//
+//                        foreach ($objPHPExcel->getWorksheetIterator() as $worksheet) {
+//                            $columnA = 'A';
+//                            $columnB = 'B';
+//                            $columnC = 'C';
+//                            $columnD = 'D';
+//                            $columnE = 'E';
+//                            $columnH = 'H';
+//                            $lastRow = $worksheet->getHighestRow();
+//                            for ($row = 2; $row <= $lastRow; $row++) {
+//                                $cellA = $worksheet->getCell($columnA . $row);
+//
+//                                if ($cellA == "TOTAL CURRENT ASSETS")
+//                                    echo $worksheet->getCell($columnB . $row);
+//                                echo "<br>";
+//                            }
+//                        }
+
+                        $local_file = $this->get('kernel')->getRootDir() . "/data/" . $cik[0] . "_FinancialReport.xlsx";
+                        $server_file = $excel_file;
+                        $ftp_server = "ftp.sec.gov";
+                        $ftp_user_name = "";
+                        $ftp_user_pass = "";
+
+                        $conn_id = ftp_connect($ftp_server);
+
+// login with username and password
+                        $login_result = ftp_login($conn_id, 'anonymous', '');
+
+// try to download $server_file and save to $local_file
+                        if (ftp_put($conn_id, $server_file, $local_file, FTP_BINARY)) {
+                            echo "Successfully written to $local_file\n";
+                        } else {
+                            echo "There was a problem\n";
+                        }
+// close the connection
+                        ftp_close($conn_id);
+                    }
+                }
+
+                $i++;
+            }
+            fclose($fh);
+            die;
         }
     }
 
