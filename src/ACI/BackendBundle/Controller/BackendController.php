@@ -196,9 +196,7 @@ class BackendController extends Controller {
     public function parse10kAction() {
         $em = $this->getDoctrine()->getManager();
         $file = $this->get('kernel')->getRootDir() . "/../data/form.idx";
-        $ftp_server = "ftp.sec.gov";
-        $conn_id = ftp_connect($ftp_server);
-        $login_result = ftp_login($conn_id, 'anonymous', '');
+
         if (!file_exists($file)) {
             exit("El archivo no existe.");
         } else {
@@ -227,8 +225,10 @@ class BackendController extends Controller {
 
 
                         $handle = fopen($local_file, 'w');
-
-
+                        $ftp_server = "ftp.sec.gov";
+                        $conn_id = ftp_connect($ftp_server);
+                        $login_result = ftp_login($conn_id, 'anonymous', '');
+                        ftp_pasv($conn_id, true);
                         if ((!$conn_id) || (!$login_result)) {
                             echo "FTP connection has failed!";
                             echo "Attempted to connect to $ftp_server";
@@ -250,6 +250,7 @@ class BackendController extends Controller {
 
 
                         fclose($handle);
+                        ftp_close($conn_id);
 
                         $objPHPExcel = PHPExcel_IOFactory::load($local_file);
 
@@ -285,7 +286,7 @@ class BackendController extends Controller {
                 }
             }
             fclose($fh);
-            ftp_close($conn_id);
+
             die;
         }
     }
